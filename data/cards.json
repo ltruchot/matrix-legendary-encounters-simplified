@@ -9,7 +9,8 @@
       "enemy_hp": "claw d'un ennemi = Attack à dépenser pour le vaincre (◎ = invincible par le texte, ignoré ici)",
       "strike_dmg": "dégâts d'une carte Strike"
     },
-    "note": "Le '+' (ex 2+) = bonus conditionnel via texte (ignoré dans le jeu découverte). '◎' = effet texte (Undefeatable/Evade...) ignoré ; on utilise le PV imprimé s'il existe."
+    "note": "Le '+' (ex 2+) = bonus conditionnel via texte (ignoré dans le jeu découverte). '◎' = effet texte (Undefeatable/Evade...) ignoré ; on utilise le PV imprimé s'il existe.",
+    "verification": "⚠️ OCR auto par sous-agents : risque de confusion ★(étoile, recruter) vs griffure(rouge, attaquer). VÉRIFIÉ À LA MAIN : les starters + les ~13 cartes du marché du prototype (2 erreurs Trinity corrigées). Les autres groupes de héros ne sont PAS encore re-vérifiés un par un — à contrôler avant usage."
   },
   "starters": [
     {"name": "Unplug", "star": 1, "claw": 0, "cost": 0, "copies_box": 35},
@@ -43,8 +44,8 @@
       {"name": "EMP", "star": 0, "claw": 5, "cost": 8, "class": "Tech", "rarity": "Rare", "kw": "Sacrifice"}
     ],
     "Trinity (The Matrix)": [
-      {"name": "We Think You're Bugged", "star": 1, "claw": 0, "cost": 3, "class": "Intellect", "rarity": "Common"},
-      {"name": "Your Men Are Already Dead", "star": 2, "claw": 0, "cost": 4, "class": "Strength", "rarity": "Common"},
+      {"name": "We Think You're Bugged", "star": 0, "claw": 1, "cost": 3, "class": "Range", "rarity": "Common", "note": "OCR corrigé: griffure (pas ★)"},
+      {"name": "Your Men Are Already Dead", "star": 0, "claw": 2, "cost": 4, "class": "Range", "rarity": "Common", "note": "OCR corrigé: griffure (pas ★)"},
       {"name": "Knife Throw", "star": 0, "claw": 3, "cost": 6, "class": "Intellect", "rarity": "Uncommon", "kw": "Coordinate"},
       {"name": "I Love You", "star": 3, "claw": 3, "cost": 8, "class": "Range", "rarity": "Rare", "kw": "Sacrifice"}
     ],

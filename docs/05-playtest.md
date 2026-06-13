@@ -19,24 +19,27 @@ Tableau de relevé suggéré :
 |---|---|---|---|---|---|---|---|
 | 1 | | | | | | | |
 
-## ✅ Équilibrage déjà validé par simulation
+## ✅ Équilibrage validé par simulation (règles v2)
 
-Les stats des cartes ont été **extraites des 213 visuels officiels** (`data/cards.csv`) et l'équilibrage
-**mesuré sur 5000 parties par config** avec un bot (`prototype/sim.js`). Résultats (Time Track 10, main 5,
-starter 3 Unplug + 3 Spoon, **max 2 agents**) :
+Stats **extraites des 213 visuels officiels** (`data/cards.csv`), équilibrage **mesuré sur 5000 parties/config**
+(`prototype/sim.js`). Règles v2 : Time Track 10, main 5, starter **3 Unplug + 2 Spoon**, **max 2 agents**,
+**achat sur le dessus du deck**, **★→temps** (3★=+1, max 3/partie). Difficulté = PV du boss :
 
-| Difficulté | Boss | Victoire (1–4 j) | Durée |
-|---|---|---|---|
-| 🟢 Facile | 8 | ~97 % | ~6 tours-joueur |
-| 🟡 Normal | 10 | ~80–85 % | ~7 |
-| 🔴 Difficile | 12 (Smith) | ~50–60 % | ~8 |
+| Difficulté | Boss (vraie carte) | Time Track | Foncer | Équilibré | Éco/contrôle | Durée |
+|---|---|---|---|---|---|---|
+| 🟢 Facile | Agent 10 | 10 | 98 % | 100 % | 100 % | ~6 |
+| 🟡 Normal | Agent Smith 12 | 10 | 63 % | 97 % | 100 % | ~7 |
+| 🔴 Difficile | Agent Smith 12 | 8 | 4 % | 64 % | 89 % | ~7 |
 
-Commandes utiles :
-- `node prototype/sim.js final` → la table ci-dessus (par nombre de joueurs).
-- `node prototype/sim.js grid [main] [unplug] [spoon] [cap] [grace]` → grille boss × temps pour re-régler.
+→ **3 stratégies réellement distinctes** ; l'économie passe d'inutile à **indispensable en difficile**.
+Durée **stable de 1 à 3 joueurs** (horloge par tour).
 
-Le **playtest physique** ci-dessous sert à confirmer ces chiffres *à la table* (sensation, durée réelle,
-test « mamie »). La méthode de calibrage reste utile si tu changes le set de cartes.
+Commandes :
+- `node prototype/sim.js final` → table ci-dessus (par nombre de joueurs).
+- `node prototype/sim.js strats|tune|grid|npdiag` → analyses (diversité des voies, calibrage, etc.).
+- `node tests/e2e.js` → joue de **vraies parties dans Chromium** (clics DOM) + screenshots dans `tests/shots/`.
+
+Le **playtest physique** ci-dessous confirme la sensation à la table (test « mamie », durée réelle).
 
 ## Calibrage express (5 min, avant le 1er vrai jeu)
 

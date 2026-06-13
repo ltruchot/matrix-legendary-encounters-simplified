@@ -32,6 +32,7 @@ est un prix. On joue donc le jeu *aux symboles*, en ignorant tout le reste.
 ## 🎮 Tester tout de suite
 
 - **Jouer** : ouvre [`prototype/index.html`](prototype/index.html) dans un navigateur (vraies cartes, vraies stats).
+- **Préparer la boîte** : [`prototype/cartes-a-sortir.html`](prototype/cartes-a-sortir.html) — guide visuel des cartes exactes à sortir (images + quantités + icônes vérifiées).
 - **Équilibrer** : `node prototype/sim.js final` (taux de victoire mesurés).
 - **Données** : [`data/cards.csv`](data/cards.csv) — les 213 cartes avec leurs stats.
 

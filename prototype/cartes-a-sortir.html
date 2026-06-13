@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATRIX 5 — Cartes à sortir de la boîte</title>
+<style>
+  :root{--green:#19ff7a;--bg:#04140a;--panel:#0a2417;--line:#1c5c38;--gold:#ffd23a;--red:#ff4d4d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:#d9ffe9;font-family:"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.5}
+  header{padding:16px 20px;border-bottom:1px solid var(--line);background:#06190e;position:sticky;top:0;z-index:5}
+  h1{margin:0;color:var(--green);letter-spacing:2px;font-size:22px}
+  .sub{opacity:.8;font-size:13px;margin-top:4px}
+  main{max-width:1200px;margin:0 auto;padding:18px}
+  .legend{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;gap:24px;flex-wrap:wrap;align-items:center}
+  .legend b{color:var(--gold)}
+  .ic{display:inline-block;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:800;color:#000;margin-right:6px}
+  section{margin-bottom:26px}
+  h2{color:var(--green);border-bottom:1px solid var(--line);padding-bottom:6px;font-size:18px}
+  h2 .count{float:right;font-size:13px;opacity:.7;font-weight:400}
+  .note{background:#06210f;border-left:3px solid var(--green);padding:8px 12px;border-radius:6px;font-size:13px;margin:8px 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .c{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;position:relative}
+  .c .imgwrap{position:relative}
+  .c img{width:100%;display:block}
+  .c .qty{position:absolute;top:6px;left:6px;background:var(--green);color:#042;font-weight:800;border-radius:8px;padding:3px 9px;font-size:15px;box-shadow:0 1px 4px #000}
+  .badge{position:absolute;z-index:2;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000;box-shadow:0 1px 4px #000}
+  .b-star{top:6px;right:6px;background:var(--gold)} .b-claw{top:40px;right:6px;background:#ff7a7a}
+  .b-cost{bottom:6px;right:6px;background:#fff;border:2px solid #042;width:34px;height:34px;font-size:18px}
+  .b-hp{bottom:6px;right:6px;background:#ff7a7a;width:34px;height:34px;font-size:18px;color:#000}
+  .c .cap{padding:7px 9px;font-size:13px}
+  .c .cap b{color:#fff} .c .cap .meta{opacity:.7;font-size:11px}
+  .diffrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .tip{opacity:.75;font-size:12px}
+  a{color:var(--green)}
+  @media(max-width:560px){.grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 MATRIX 5 — cartes à sortir de la boîte</h1>
+  <div class="sub">Guide de tri pour préparer l'animation. Sors uniquement ces cartes ; range tout le reste. (<a href="index.html">▶ ouvrir le jeu</a>)</div>
+</header>
+<main>
+  <div class="legend">
+    <span><span class="ic" style="background:var(--gold)">★</span><b>★ doré</b> = recruter (acheter)</span>
+    <span><span class="ic" style="background:#ff7a7a">╱</span><b>griffure rouge</b> = attaquer / PV d'un ennemi</span>
+    <span><span class="ic" style="background:#fff">3</span><b>chiffre bas-droit</b> = prix</span>
+    <span class="tip">⛔ Le texte des cartes ne compte pas — on joue aux icônes.</span>
+  </div>
+  <div id="app"></div>
+</main>
+<script>
+const IMG="../assets/cards/";
+const DATA=[
+ {title:"1 · Deck de départ — POUR CHAQUE JOUEUR (1 à 3)",
+  note:"Donne à chaque joueur 3 « Unplug » + 2 « There Is No Spoon ». Pour 3 joueurs : 9 Unplug + 6 There Is No Spoon.",
+  cards:[
+   {img:"StarterUnplug.jpg",name:"Unplug",meta:"★1",qty:"×3 / joueur",star:1},
+   {img:"StarterThereIsNoSpoon.jpg",name:"There Is No Spoon",meta:"griffure 1",qty:"×2 / joueur",claw:1},
+  ]},
+ {title:"2 · Marché commun (le « Dock »)",
+  note:"Mélange ces 15 cartes en une pioche, révèle-en 4 face visible. Toutes sont rentables aux icônes (les cartes à valeur « texte » ont été écartées).",
+  cards:[
+   {img:"NebuchadnezzarCrew_2Common.jpg",name:"Dozer",qty:"×2",star:2,cost:2},
+   {img:"Tank_2Common.jpg",name:"Operator",qty:"×2",star:2,cost:3},
+   {img:"MorpheusTheMatrix_2Common.jpg",name:"I've Spent My Entire Life",qty:"×2",star:2,cost:3},
+   {img:"HovercraftTheNebuchadnezzar.jpg",name:"The Nebuchadnezzar (Hovercraft)",qty:"×2",star:2,cost:3},
+   {img:"TrinityTheMatrix_2Common.jpg",name:"Your Men Are Already Dead",qty:"×2",claw:2,cost:4},
+   {img:"Tank_3Common.jpg",name:"Combat Training",qty:"×2",claw:2,cost:4},
+   {img:"MorpheusTheMatrix_4Uncommon.jpg",name:"You Think That's Air",qty:"×2",claw:3,cost:5},
+   {img:"Tank_4Uncommon.jpg",name:"It's a Trap, Get Out!",qty:"×1",claw:4,cost:6},
+  ]},
+ {title:"3 · Pile de menace — les agents (face cachée)",
+  note:"Mélange ces ennemis en une pile face cachée. Si tu n'as pas autant d'exemplaires des « Part of the System », mets ce que la boîte contient. Petits chiffres = faciles à tuer.",
+  cards:[
+   {img:"PartOfTheSystem-SecurityGuard.jpg",name:"Security Guard",qty:"×3",hp:1},
+   {img:"PartOfTheSystem-TacticalPolice.jpg",name:"Tactical Police",qty:"×3",hp:2},
+   {img:"PartOfTheSystem-Soldier.jpg",name:"Soldier",qty:"×2",hp:3},
+   {img:"Act1WhatIsTheMatrix_1.jpg",name:"Police Officer",qty:"×1",hp:3},
+   {img:"Act3HeIsTheOne_6.jpg",name:"Cypher",qty:"×1",hp:5},
+   {img:"Act3HeIsTheOne_1.jpg",name:"Military Guard",qty:"×1",hp:6},
+   {img:"Act3HeIsTheOne_2.jpg",name:"Agent Jones",qty:"×1",hp:8},
+  ]},
+ {title:"4 · Boss — choisis selon la difficulté",
+  note:"Un seul boss par partie. Pose un marqueur de PV dessus. La difficulté = quel boss + où tu places le curseur du Time Track.",
+  cards:[
+   {img:"Act3TheSource_1.jpg",name:"Agent — 🟢 FACILE",meta:"Boss 10 PV · Time Track sur 10",qty:"Boss",hp:10},
+   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🟡 NORMAL",meta:"Boss 12 PV · Time Track sur 10",qty:"Boss",hp:12},
+   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🔴 DIFFICILE",meta:"Boss 12 PV · Time Track sur 8",qty:"Boss",hp:12},
+  ]},
+];
+const badge=(c)=>`${c.star?`<div class="badge b-star">${c.star}</div>`:''}${c.claw?`<div class="badge b-claw">${c.claw}</div>`:''}${c.cost!=null?`<div class="badge b-cost">${c.cost}</div>`:''}${c.hp!=null&&c.cost==null?`<div class="badge b-hp">${c.hp}</div>`:''}`;
+document.getElementById('app').innerHTML=DATA.map(sec=>{
+  const n=sec.cards.reduce((s,c)=>s+ (parseInt((c.qty.match(/\d+/)||[1])[0])||1),0);
+  return `<section><h2>${sec.title}</h2>
+   <div class="note">${sec.note}</div>
+   <div class="grid">${sec.cards.map(c=>`
+     <div class="c"><div class="imgwrap"><div class="qty">${c.qty}</div>${badge(c)}<img src="${IMG}${c.img}" loading="lazy"></div>
+       <div class="cap"><b>${c.name}</b>${c.meta?`<div class="meta">${c.meta}</div>`:''}</div></div>`).join('')}</div>
+  </section>`;
+}).join('')
++ `<section><h2>5 · Plateau & marqueurs</h2><div class="note">Utilise le <b>Time Track</b> du plateau d'origine (curseur sur 10, ou 8 en difficile) + un jeton/dé pour marquer les PV du boss. C'est tout.</div></section>`;
+</script>
+</body>
+</html>

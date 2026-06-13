@@ -5,278 +5,253 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MATRIX 5 — Prototype jouable</title>
 <style>
-  :root{--green:#19ff7a;--bg:#04140a;--panel:#0a2417;--line:#1c5c38;--gold:#ffd23a;--red:#ff4d4d}
+  :root{--green:#19ff7a;--bg:#04140a;--panel:#0a2417;--line:#1c5c38;--gold:#ffd23a;--red:#ff4d4d;--blue:#5fd0ff}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:#d9ffe9;font-family:"Segoe UI",system-ui,sans-serif;font-size:14px}
   h1{font-size:20px;margin:0;letter-spacing:3px;color:var(--green);text-shadow:0 0 8px #0f8}
-  header{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:#06190e;position:sticky;top:0;z-index:5}
+  header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:#06190e;position:sticky;top:0;z-index:5}
   header .sp{flex:1}
   select,button{background:#0a2417;color:#d9ffe9;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
   button.primary{background:var(--green);color:#042;border:none;font-weight:700}
-  button:disabled{opacity:.35;cursor:not-allowed}
-  .wrap{display:grid;grid-template-columns:230px 1fr;gap:12px;padding:12px;max-width:1280px;margin:0 auto}
+  button.alt{background:#06314a;border-color:#0a567f;color:var(--blue)}
+  button:disabled{opacity:.32;cursor:not-allowed}
+  .wrap{display:grid;grid-template-columns:250px 1fr;gap:12px;padding:12px;max-width:1320px;margin:0 auto}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
   .stat{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:15px}
-  .big{font-size:30px;font-weight:800;line-height:1}
+  .big{font-size:32px;font-weight:800;line-height:1}
   .time .big{color:var(--gold)} .boss .big{color:var(--red)}
-  .pool{display:flex;gap:14px;margin-top:6px}
-  .chip{background:#06210f;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:16px;font-weight:700}
-  .chip .lbl{font-size:11px;font-weight:400;opacity:.7;display:block}
-  .row-title{margin:14px 0 6px;color:var(--green);font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.85}
-  .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:10px}
-  .card{width:96px;border-radius:7px;overflow:hidden;border:2px solid #0c3;position:relative;cursor:pointer;transition:transform .08s;background:#000}
+  .flash{animation:fl .6s}@keyframes fl{0%{transform:scale(1.5);color:#fff}100%{}}
+  .pool{display:flex;gap:10px;margin-top:8px}
+  .chip{flex:1;background:#06210f;border:1px solid var(--line);border-radius:8px;padding:8px 6px;font-size:22px;font-weight:800;text-align:center}
+  .chip.star{color:var(--gold)} .chip.claw{color:#ff9a9a}
+  .chip .lbl{font-size:11px;font-weight:400;opacity:.75;display:block}
+  .row-title{margin:14px 0 6px;color:var(--green);font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.9}
+  .row-title small{text-transform:none;letter-spacing:0;opacity:.7;font-weight:400}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;min-height:10px}
+  .card{border-radius:8px;overflow:hidden;border:2px solid #0c3;position:relative;cursor:pointer;transition:transform .08s}
   .card:hover{transform:translateY(-4px)}
   .card img{width:100%;display:block}
-  .card.dis{filter:grayscale(.7) brightness(.55);cursor:not-allowed}
-  .card.played{opacity:.5}
-  .card .tag{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.72);font-size:11px;padding:2px 4px;text-align:center}
+  .card.dis{filter:grayscale(.7) brightness(.5);cursor:not-allowed}
+  .card.played{opacity:.45}
+  .card.buyable{box-shadow:0 0 0 2px var(--gold),0 0 14px var(--gold)}
+  .card.legue{box-shadow:0 0 0 3px var(--blue),0 0 14px var(--blue)}
+  .card .tag{position:absolute;z-index:1;bottom:0;left:0;right:0;background:rgba(0,0,0,.78);font-size:12px;padding:3px 5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card.market .tag{padding-right:40px}            /* place pour le prix */
+  .card .need{position:absolute;z-index:1;bottom:26px;left:0;right:0;text-align:center;font-size:12px;font-weight:700;color:#fff;background:rgba(180,30,30,.85);padding:2px 0}
   .card.enemy{border-color:var(--red)} .card.market{border-color:var(--gold)}
-  .badge{position:absolute;top:3px;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#000}
-  .b-star{right:3px;background:var(--gold)} .b-claw{left:3px;background:#ff7a7a} .b-cost{right:3px;top:auto;bottom:24px;background:#fff}
-  .boss-card{display:flex;gap:12px;align-items:center}
-  .boss-card img{width:120px;border:2px solid var(--red);border-radius:8px}
-  #log{height:120px;overflow:auto;font-size:12px;line-height:1.5;background:#06190e;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:10px}
+  .badge{position:absolute;z-index:3;top:4px;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000;box-shadow:0 1px 4px #000}
+  .b-star{right:4px;background:var(--gold)} .b-claw{left:4px;background:#ff7a7a}
+  .b-cost{right:4px;top:auto;bottom:4px;background:#fff;width:34px;height:34px;font-size:18px;border:2px solid #042} /* prix bien visible, par-dessus le nom */
+  .b-time{left:4px;top:auto;bottom:4px;background:var(--gold);width:auto;height:auto;border-radius:10px;padding:2px 7px;font-size:12px}
+  .boss-card{display:flex;gap:10px;align-items:center}
+  .boss-card img{width:96px;border:2px solid var(--red);border-radius:8px}
+  .actbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  #log{height:96px;overflow:auto;font-size:12px;line-height:1.5;background:#06190e;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:10px}
   #log b{color:var(--green)}
-  .overlay{position:fixed;inset:0;background:rgba(0,10,4,.93);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:20;text-align:center}
+  .overlay{position:fixed;inset:0;background:rgba(0,10,4,.94);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:20;text-align:center;padding:20px}
   .overlay.show{display:flex}
-  .overlay h2{font-size:42px;margin:0 0 10px}
+  .overlay h2{font-size:40px;margin:0 0 10px}
   .win h2{color:var(--green)} .lose h2{color:var(--red)}
-  .hint{opacity:.7;font-size:12px;margin-top:4px}
-  .pcount{display:flex;gap:6px;flex-wrap:wrap}
-  .ptab{padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px}
-  .ptab.active{background:var(--green);color:#042;font-weight:700}
+  .hint{opacity:.75;font-size:12px}
+  .howto{max-width:680px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;text-align:left;font-size:15px;line-height:1.6}
+  .howto h2{color:var(--green);margin-top:0}
+  .howto .icn{display:inline-block;width:26px;height:26px;border-radius:50%;text-align:center;line-height:26px;font-weight:800;color:#000;margin-right:4px}
+  .howto b{color:var(--gold)}
+  .banner{background:#06314a;border:1px solid #0a567f;color:var(--blue);border-radius:8px;padding:6px 10px;margin-top:8px;font-size:13px;display:none}
+  .banner.show{display:block}
+  /* Responsive : 1 colonne sur petit écran, cartes plus compactes */
+  @media(max-width:860px){ .wrap{grid-template-columns:1fr} }
+  @media(max-width:540px){ .cards{grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:7px} .badge{width:26px;height:26px;font-size:14px} .b-cost{width:30px;height:30px} }
 </style>
 </head>
 <body>
 <header>
   <h1>MATRIX&nbsp;5</h1>
-  <span class="hint">prototype — vraies cartes &amp; vraies stats. Le texte ne compte pas : ★ achète, griffure frappe.</span>
+  <button class="alt" id="help">❔ Comment jouer</button>
+  <a class="alt" href="cartes-a-sortir.html" style="text-decoration:none;padding:6px 10px;border-radius:6px">🃏 Cartes à sortir</a>
   <span class="sp"></span>
   <label>Difficulté
     <select id="diff">
-      <option value="8">🟢 Facile (Boss 8)</option>
-      <option value="10" selected>🟡 Normal (Boss 10)</option>
-      <option value="12">🔴 Difficile (Smith 12)</option>
+      <option value="facile">🟢 Facile (Agent 10)</option>
+      <option value="normal" selected>🟡 Normal (Smith 12)</option>
+      <option value="difficile">🔴 Difficile (Smith 12 · temps 8)</option>
     </select>
   </label>
-  <label>Joueurs
-    <select id="np"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
-  </label>
-  <label>Time Track
-    <select id="tt"><option>8</option><option>9</option><option selected>10</option><option>11</option><option>12</option></select>
-  </label>
+  <label>Joueurs <select id="np"><option selected>1</option><option>2</option><option>3</option></select></label>
   <button class="primary" id="newgame">Nouvelle partie</button>
 </header>
 
 <div class="wrap">
-  <!-- Colonne gauche : état -->
   <div>
     <div class="panel time">
-      <div class="stat"><span>⏳ Time Track</span><span class="big" id="timeVal">–</span></div>
-      <div class="hint">Tombe à 0 = les machines gagnent.</div>
+      <div class="stat"><span>⏳ Temps</span><span class="big" id="timeVal">–</span></div>
+      <div class="hint">À 0 = les machines gagnent. Chaque agent encore vivant à la fin de ton tour fait <b>−1</b>.</div>
     </div>
     <div class="panel boss" style="margin-top:10px">
-      <div class="stat"><span>🕶️ Boss — PV</span><span class="big" id="bossHp">–</span></div>
+      <div class="stat"><span>🕶️ Boss</span><span class="big" id="bossHp">–</span></div>
       <div class="boss-card"><img id="bossImg" alt="boss"><div class="hint" id="bossName"></div></div>
     </div>
     <div class="panel" style="margin-top:10px">
       <div class="stat"><b id="curPlayer">—</b></div>
-      <div class="pcount" id="pTabs"></div>
       <div class="pool">
-        <div class="chip"><span class="lbl">★ étoiles</span><span id="poolStar">0</span></div>
-        <div class="chip"><span class="lbl">griffure</span><span id="poolClaw">0</span></div>
+        <div class="chip star"><span class="lbl">★ à dépenser</span><span id="poolStar">0</span></div>
+        <div class="chip claw"><span class="lbl">griffure</span><span id="poolClaw">0</span></div>
       </div>
-      <button class="primary" id="endTurn" style="width:100%;margin-top:10px">Fin du tour ▶</button>
-      <div class="hint" style="margin-top:6px">Joue ta main, dépense, puis finis le tour. Les ennemis encore vivants font reculer le temps.</div>
+      <div class="actbar">
+        <button class="alt" id="buyTime">⏳ Gagner du temps (3★)</button>
+        <button class="alt" id="legue">🎁 Léguer une carte</button>
+        <button class="alt" id="resetTurn">↩︎ Recommencer le tour</button>
+      </div>
+      <div class="banner" id="banner"></div>
+      <button class="primary" id="endTurn" style="width:100%;margin-top:8px">Fin du tour ▶</button>
     </div>
   </div>
 
-  <!-- Colonne droite : plateau -->
   <div class="panel">
-    <div class="row-title">Agents sur la table <span class="hint">(clique pour tuer : il faut assez de griffure)</span></div>
+    <div class="row-title">Agents sur la table <small>— clique pour tuer (assez de griffure). Chacun en vie = ⏳−1 en fin de tour.</small></div>
     <div class="cards" id="enemies"></div>
 
-    <div class="row-title">🕶️ Boss <span class="hint">(clique pour frapper avec ta griffure)</span></div>
-    <div class="cards"><div class="card market" id="bossAttack" style="border-color:var(--red);width:80px"><div class="tag">Frapper le boss</div><div style="height:60px;display:flex;align-items:center;justify-content:center;font-size:28px">🎯</div></div></div>
+    <div class="row-title">🕶️ Boss <small>— clique pour le frapper (griffure). Le mettre à 0 = victoire.</small></div>
+    <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(110px,110px))"><div class="card" id="bossAttack" style="border-color:var(--red)"><div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:40px">🎯</div><div class="tag">Frapper le boss</div></div></div>
 
-    <div class="row-title">Marché <span class="hint">(clique pour acheter avec tes ★ — coût = pastille blanche)</span></div>
+    <div class="row-title">Marché <small>— clique pour recruter (★). La carte arrive <b>sur ton deck</b> (jouée au tour suivant).</small></div>
     <div class="cards" id="market"></div>
 
-    <div class="row-title">Ta main <span class="hint">(clique pour jouer)</span></div>
+    <div class="row-title">Ta main <small>— clique pour jouer (★/griffure s'ajoutent en haut à gauche).</small></div>
     <div class="cards" id="hand"></div>
-
     <div id="log"></div>
   </div>
 </div>
 
-<div class="overlay" id="overlay"><h2 id="ovTitle"></h2><div id="ovText" class="hint"></div><button class="primary" style="margin-top:16px" onclick="document.getElementById('overlay').classList.remove('show')">Fermer</button></div>
+<!-- Fin de partie -->
+<div class="overlay" id="overlay"><h2 id="ovTitle"></h2><div id="ovText" class="hint"></div><button class="primary" style="margin-top:16px" id="ovClose">Rejouer</button></div>
+
+<!-- Tutoriel -->
+<div class="overlay show" id="howtoOv"><div class="howto">
+  <h2>MATRIX 5 — en 30 secondes</h2>
+  <p><b>But :</b> mettre le <b style="color:#ff7a7a">Boss</b> à 0 PV <b>avant</b> que le ⏳ Temps ne tombe à 0.</p>
+  <p>Tu lis <b>seulement les icônes</b> (le texte des cartes ne compte pas) :</p>
+  <p>
+    <span class="icn" style="background:#ffd23a">★</span> = <b>acheter</b> des cartes &nbsp;·&nbsp;
+    <span class="icn" style="background:#ff7a7a">╱</span> = <b>griffure</b> = <b>frapper</b> (boss / agents) &nbsp;·&nbsp;
+    <span class="icn" style="background:#fff">3</span> = <b>prix</b> (coin bas-droit)
+  </p>
+  <p><b>Ton tour :</b> un agent débarque (max 2) → joue ta main → dépense :
+  griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte arrive sur ton deck) ou <b>gagner du temps</b>.
+  Puis tu peux <b>léguer 1 carte</b> au joueur suivant (solo : la garder pour ton prochain tour). Fin du tour :
+  chaque agent encore vivant fait <b>⏳−1</b>.</p>
+  <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
+  En difficile, l'économie devient indispensable.</p>
+  <button class="primary" id="howtoClose">J'ai compris — jouer</button>
+</div></div>
 
 <script>
-const IMG = "../assets/cards/";
-// ---- DONNÉES RÉELLES (extraites des visuels officiels — voir data/cards.csv) ----
-const STARTERS = [
-  {name:"Unplug", star:1, claw:0, img:"StarterUnplug.jpg", n:3},
-  {name:"There Is No Spoon", star:0, claw:1, img:"StarterThereIsNoSpoon.jpg", n:3},
-];
-const CAP_AGENTS = 2; // au plus 2 agents en jeu (équilibrage validé par sim)
-const HAND = 5;
-// Marché : héros à valeurs FIXES uniquement (icônes pures, pas de texte conditionnel)
-const MARKET_POOL = [
-  {name:"Dozer", star:2, claw:0, cost:2, img:"NebuchadnezzarCrew_2Common.jpg", n:2},
-  {name:"Operator", star:2, claw:0, cost:3, img:"Tank_2Common.jpg", n:2},
-  {name:"Welcome to the Real World", star:2, claw:0, cost:3, img:"MorpheusTheMatrix_2Common.jpg", n:2},
-  {name:"We Think You're Bugged", star:1, claw:0, cost:3, img:"TrinityTheMatrix_3Common.jpg", n:2},
-  {name:"Combat Training", star:0, claw:2, cost:4, img:"Tank_3Common.jpg", n:2},
-  {name:"Your Men Are Already Dead", star:2, claw:0, cost:4, img:"TrinityTheMatrix_2Common.jpg", n:2},
-  {name:"Mouse", star:1, claw:1, cost:4, img:"NebuchadnezzarCrew_3Common.jpg", n:2},
-  {name:"You Think That's Air", star:0, claw:3, cost:5, img:"MorpheusTheMatrix_4Uncommon.jpg", n:2},
-  {name:"Knife Throw", star:0, claw:3, cost:6, img:"TrinityTheMatrix_4Uncommon.jpg", n:1},
-  {name:"It's a Trap!", star:0, claw:4, cost:6, img:"Tank_4Uncommon.jpg", n:1},
-  {name:"Apoc", star:0, claw:4, cost:7, img:"NebuchadnezzarCrew_1Rare.jpg", n:1},
-  {name:"Breakfast of Champions", star:2, claw:2, cost:7, img:"Tank_1RAre.jpg", n:1},
-  {name:"Hovercraft", star:2, claw:0, cost:3, img:"HovercraftTheNebuchadnezzar.jpg", n:3},
-];
-// Pile de menace : ennemis à PV fixes, escalade
-const ENEMY_POOL = [
-  {name:"Security Guard", hp:1, img:"PartOfTheSystem-SecurityGuard.jpg", n:3},
-  {name:"Tactical Police", hp:2, img:"PartOfTheSystem-TacticalPolice.jpg", n:3},
-  {name:"Soldier", hp:3, img:"PartOfTheSystem-Soldier.jpg", n:2},
-  {name:"Police Officer", hp:3, img:"Act1WhatIsTheMatrix_1.jpg", n:2},
-  {name:"Cypher", hp:5, img:"Act3HeIsTheOne_6.jpg", n:1},
-  {name:"Military Guard", hp:6, img:"Act3HeIsTheOne_1.jpg", n:1},
-  {name:"Agent Jones", hp:8, img:"Act3HeIsTheOne_2.jpg", n:1},
-];
-const BOSS = {name:"Agent Smith", img:"Act3HeIsTheOneExtra_9.jpg"};
+const IMG="../assets/cards/";
+const STARTERS=[{name:"Unplug",star:1,claw:0,img:"StarterUnplug.jpg",n:3},{name:"There Is No Spoon",star:0,claw:1,img:"StarterThereIsNoSpoon.jpg",n:2}];
+// Marché CURÉ + icônes vérifiées à la main sur les vraies images (★ doré = recruter, griffure rouge = attaquer).
+// On ne garde que des cartes rentables aux icônes seules (les cartes dont la valeur est dans le texte sont écartées).
+const MARKET_POOL=[
+  {name:"Dozer",star:2,claw:0,cost:2,img:"NebuchadnezzarCrew_2Common.jpg",n:2},
+  {name:"Operator",star:2,claw:0,cost:3,img:"Tank_2Common.jpg",n:2},
+  {name:"I've Spent My Entire Life",star:2,claw:0,cost:3,img:"MorpheusTheMatrix_2Common.jpg",n:2},
+  {name:"Hovercraft Nebuchadnezzar",star:2,claw:0,cost:3,img:"HovercraftTheNebuchadnezzar.jpg",n:2},
+  {name:"Your Men Are Already Dead",star:0,claw:2,cost:4,img:"TrinityTheMatrix_2Common.jpg",n:2},
+  {name:"Combat Training",star:0,claw:2,cost:4,img:"Tank_3Common.jpg",n:2},
+  {name:"You Think That's Air",star:0,claw:3,cost:5,img:"MorpheusTheMatrix_4Uncommon.jpg",n:2},
+  {name:"It's a Trap!",star:0,claw:4,cost:6,img:"Tank_4Uncommon.jpg",n:1}];
+const ENEMY_POOL=[
+  {name:"Security Guard",hp:1,img:"PartOfTheSystem-SecurityGuard.jpg",n:3},
+  {name:"Tactical Police",hp:2,img:"PartOfTheSystem-TacticalPolice.jpg",n:3},
+  {name:"Soldier",hp:3,img:"PartOfTheSystem-Soldier.jpg",n:2},
+  {name:"Police Officer",hp:3,img:"Act1WhatIsTheMatrix_1.jpg",n:2},
+  {name:"Cypher",hp:5,img:"Act3HeIsTheOne_6.jpg",n:1},
+  {name:"Military Guard",hp:6,img:"Act3HeIsTheOne_1.jpg",n:1},
+  {name:"Agent Jones",hp:8,img:"Act3HeIsTheOne_2.jpg",n:1}];
+// Difficulté = vraie carte boss + position du curseur Temps (tout est physique/réel)
+const DIFFS={
+  facile:   {hp:10,time:10,boss:{name:"Agent (10)",       img:"Act3TheSource_1.jpg"}},
+  normal:   {hp:12,time:10,boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"}},
+  difficile:{hp:12,time:8, boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"}}
+};
+const HAND=5, CAP=2, BT_COST=3, BT_MAX=3;
 
-// ---- ÉTAT ----
-let G=null;
+let G=null, turnSnap=null;
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function expand(pool){const r=[];pool.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r}
+const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r};
 
 function newGame(){
-  const np=+$("np").value, bossHp=+$("diff").value, time=+$("tt").value;
-  const players=[];
-  for(let i=0;i<np;i++){
-    let deck=shuffle(expand(STARTERS));
-    players.push({id:i, deck, discard:[], hand:[], played:[]});
-  }
-  G={players, cur:0, time, bossHp, bossMax:bossHp, star:0, claw:0,
-     market:[], marketDeck:shuffle(expand(MARKET_POOL)),
-     threat:shuffle(expand(ENEMY_POOL)), enemies:[], over:false};
-  for(let i=0;i<4;i++) refillMarket();
-  $("bossImg").src=IMG+BOSS.img; $("bossName").textContent=BOSS.name;
+  const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.hp;
+  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[]});
+  G={players,cur:0,time:d.time,bossHp,bossMax:bossHp,star:0,claw:0,btUses:0,
+     market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:shuffle(expand(ENEMY_POOL)),enemies:[],
+     over:false,legueMode:false,legueDone:false};
+  for(let i=0;i<4;i++) if(G.marketDeck.length)G.market.push(G.marketDeck.pop());
+  $("bossImg").src=IMG+d.boss.img; $("bossName").textContent=d.boss.name;
   $("overlay").classList.remove("show");
-  log(`<b>Nouvelle partie</b> — ${np} joueur(s), boss ${bossHp} PV, temps ${time}.`);
+  log(`<b>Nouvelle partie</b> — ${np} joueur(s), boss ${bossHp} PV.`);
   startTurn();
 }
-function refillMarket(){ if(G.marketDeck.length) G.market.push(G.marketDeck.pop()); }
-
 function startTurn(){
   const p=G.players[G.cur];
-  drawTo(p,HAND);
-  G.star=0; G.claw=0;
-  p.played=[];
-  // un agent débarque SEULEMENT s'il y a de la place (max 2 sur la table)
-  if(G.threat.length && G.enemies.length<CAP_AGENTS){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
-  else if(!G.threat.length) log("Plus d'agents dans la pile de menace.");
-  else log(`La table est pleine (max ${CAP_AGENTS} agents) — aucun nouvel agent.`);
+  while(p.hand.length<HAND){ if(!p.deck.length){ if(!p.discard.length)break; p.deck=shuffle(p.discard); p.discard=[]; } p.hand.push(p.deck.pop()); }
+  G.star=0; G.claw=0; p.played=[]; G.legueMode=false; G.legueDone=false;
+  if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
+  turnSnap=JSON.stringify(G); // photo du début de tour (pour "Recommencer le tour")
   render();
 }
-function drawTo(p,n){
-  while(p.hand.length<n){
-    if(!p.deck.length){ if(!p.discard.length) break; p.deck=shuffle(p.discard); p.discard=[]; }
-    p.hand.push(p.deck.pop());
-  }
-}
-function playCard(idx){
-  const p=G.players[G.cur]; const c=p.hand[idx]; if(!c) return;
-  G.star+=c.star; G.claw+=c.claw;
-  p.played.push(c); p.hand.splice(idx,1);
-  render();
-}
-function attackBoss(){
-  if(G.over) return;
-  if(G.claw<=0){flash("Pas de griffure à dépenser.");return;}
-  const dmg=Math.min(G.claw, G.bossHp);
-  G.claw-=dmg; G.bossHp-=dmg;
-  log(`Tu frappes le boss : -${dmg} PV (reste ${G.bossHp}).`);
-  if(G.bossHp<=0) return end(true);
-  render();
-}
-function killEnemy(uid){
-  const e=G.enemies.find(x=>x.uid===uid); if(!e) return;
-  if(G.claw<e.hp){flash(`Il faut ${e.hp} griffure pour tuer ${e.name} (tu as ${G.claw}).`);return;}
-  G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid);
-  log(`Tu élimines <b>${e.name}</b> (-${e.hp} griffure).`);
-  render();
-}
-function buy(idx){
-  const c=G.market[idx]; if(!c) return;
-  if(G.star<c.cost){flash(`Il faut ${c.cost}★ (tu as ${G.star}).`);return;}
-  G.star-=c.cost; G.players[G.cur].discard.push({...c});
-  G.market.splice(idx,1); refillMarket();
-  log(`Tu recrutes <b>${c.name}</b> (-${c.cost}★).`);
-  render();
-}
-function endTurn(){
-  if(G.over) return;
-  const p=G.players[G.cur];
-  // ennemis survivants -> temps
-  const surv=G.enemies.length;
-  if(surv){ G.time-=surv; log(`${surv} agent(s) en vie → <b>temps -${surv}</b> (reste ${G.time}).`); }
-  if(G.time<=0) return end(false);
-  // cleanup
-  p.discard.push(...p.played, ...p.hand); p.played=[]; p.hand=[];
-  G.cur=(G.cur+1)%G.players.length;
-  startTurn();
-}
-function end(win){
-  G.over=true; render();
-  $("overlay").className="overlay show "+(win?"win":"lose");
-  $("ovTitle").textContent=win?"VICTOIRE 🟢":"DÉFAITE 💀";
-  $("ovText").textContent=win?"Vous avez libéré la Matrice ! (boss à 0)":"Les machines ont gagné (temps à 0).";
-}
+function playCard(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over)return;
+  if(G.legueMode){ return bequeath(i); }
+  G.star+=c.star; G.claw+=c.claw; p.played.push(c); p.hand.splice(i,1); render(); }
+function unplay(i){ const p=G.players[G.cur]; const c=p.played[i]; if(!c||G.over)return;
+  if(G.star-c.star<0||G.claw-c.claw<0)return flash("Ressources déjà dépensées — reprends d'abord un achat/une frappe, ou clique « Recommencer le tour ».");
+  G.star-=c.star; G.claw-=c.claw; p.played.splice(i,1); p.hand.push(c); log(`↩︎ Carte reprise en main.`); render(); }
+function resetTurn(){ if(!turnSnap||G.over)return; G=JSON.parse(turnSnap); log("↩︎ Tour recommencé."); render(); }
+function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legueDone)return;
+  p.hand.splice(i,1); const tgt= G.players.length>1 ? (G.cur+1)%G.players.length : G.cur;
+  G.players[tgt].deck.push(c); G.legueDone=true; G.legueMode=false;
+  log(G.players.length>1 ? `🎁 Tu lègues <b>${c.name}</b> au joueur ${tgt+1} (sur son deck).` : `🎁 Tu gardes <b>${c.name}</b> pour ton prochain tour.`);
+  render(); }
+function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.claw-=d; G.bossHp-=d; log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
+function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
+function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.star<c.cost)return flash(`Il faut ${c.cost}★ (tu as ${G.star}).`); G.star-=c.cost; G.players[G.cur].deck.push({...c}); G.market.splice(i,1); if(G.marketDeck.length)G.market.push(G.marketDeck.pop()); log(`Recruté <b>${c.name}</b> → sur ton deck (joué au prochain tour).`); render(); }
+function buyTime(){ if(G.over)return; if(G.btUses>=BT_MAX)return flash(`Plus de 'gagner du temps' (max ${BT_MAX}).`); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★.`); G.star-=BT_COST; G.time++; G.btUses++; log(`⏳ +1 temps (−${BT_COST}★). Reste ${BT_MAX-G.btUses} usage(s).`); flashTime(); render(); }
+function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
+function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const surv=G.enemies.length;
+  if(surv){ G.time-=surv; log(`Fin du tour : ${surv} agent(s) en vie → <b>⏳ −${surv}</b> (reste ${G.time}).`); flashTime(); }
+  if(G.time<=0)return end(false);
+  p.discard.push(...p.played,...p.hand); p.played=[]; p.hand=[];
+  G.cur=(G.cur+1)%G.players.length; startTurn(); }
+function end(win){ G.over=true; render(); $("overlay").className="overlay show "+(win?"win":"lose"); $("ovTitle").textContent=win?"VICTOIRE 🟢":"DÉFAITE 💀"; $("ovText").textContent=win?"Vous avez libéré la Matrice !":"Le temps est écoulé — les machines gagnent."; }
 
-// ---- RENDU ----
 function badge(cls,val){return `<div class="badge ${cls}">${val}</div>`}
-function render(){
-  if(!G) return;
-  $("timeVal").textContent=G.time;
-  $("bossHp").textContent=G.bossHp+" / "+G.bossMax;
+function render(){ if(!G)return;
+  $("timeVal").textContent=G.time; $("bossHp").textContent=G.bossHp+" / "+G.bossMax;
   $("poolStar").textContent=G.star; $("poolClaw").textContent=G.claw;
-  $("curPlayer").textContent="🎮 Tour du Joueur "+(G.cur+1);
-  // onglets joueurs
-  $("pTabs").innerHTML=G.players.map((p,i)=>`<span class="ptab ${i===G.cur?'active':''}">J${i+1} · deck ${p.deck.length+p.discard.length}</span>`).join("");
-  // ennemis
-  $("enemies").innerHTML=G.enemies.map(e=>{
-    const ok=G.claw>=e.hp && !G.over;
-    return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">
-      ${badge('b-claw',e.hp)}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;
-  }).join("") || '<span class="hint">aucun agent</span>';
-  // marché
-  $("market").innerHTML=G.market.map((c,i)=>{
-    const ok=G.star>=c.cost && !G.over;
-    return `<div class="card market ${ok?'':'dis'}" onclick="buy(${i})">
-      ${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',c.cost)}
-      <img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;
-  }).join("");
-  // main
+  $("curPlayer").textContent="🎮 Joueur "+(G.cur+1);
+  $("enemies").innerHTML=G.enemies.map(e=>{const ok=G.claw>=e.hp&&!G.over;
+    return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">${badge('b-claw',e.hp)}${badge('b-time','⏳-1')}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;}).join("")||'<span class="hint">aucun agent</span>';
+  $("market").innerHTML=G.market.map((c,i)=>{const ok=G.star>=c.cost&&!G.over;
+    return `<div class="card market ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',c.cost)}${ok?'':'<div class="need">manque '+(c.cost-G.star)+'★</div>'}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
   const p=G.players[G.cur];
-  $("hand").innerHTML=p.hand.map((c,i)=>`<div class="card ${G.over?'dis':''}" onclick="playCard(${i})">
-      ${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}
-      <img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`).join("")
-    + p.played.map(c=>`<div class="card played"><img src="${IMG}${c.img}"><div class="tag">joué</div></div>`).join("");
+  $("hand").innerHTML=p.hand.map((c,i)=>`<div class="card ${G.over?'dis':''} ${G.legueMode?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${G.legueMode?'léguer ↑':c.name}</div></div>`).join("")
+    + p.played.map((c,i)=>`<div class="card played" onclick="unplay(${i})" title="reprendre">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">↩︎ reprendre</div></div>`).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
+  $("buyTime").disabled=G.over||G.btUses>=BT_MAX||G.star<BT_COST; $("buyTime").textContent=`⏳ Gagner du temps (3★) · ${BT_MAX-G.btUses} restant`;
+  $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
+  $("resetTurn").disabled=G.over;
+  const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à léguer (elle ne sera pas jouée).";}else{b.className="banner";}
+  $("endTurn").textContent=G.enemies.length?`Fin du tour ▶ (⏳ −${G.enemies.length})`:"Fin du tour ▶";
 }
-let logbuf=[];
-function log(m){logbuf.unshift(m); $("log").innerHTML=logbuf.slice(0,40).map(x=>"• "+x).join("<br>");}
+let logbuf=[]; function log(m){logbuf.unshift(m);$("log").innerHTML=logbuf.slice(0,40).map(x=>"• "+x).join("<br>");}
 function flash(m){log("⚠️ "+m);}
+function flashTime(){const el=$("timeVal");el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}
 
-$("newgame").onclick=newGame;
-$("endTurn").onclick=endTurn;
-$("bossAttack").onclick=attackBoss;
-newGame();
+$("newgame").onclick=newGame; $("endTurn").onclick=endTurn; $("bossAttack").onclick=attackBoss;
+$("buyTime").onclick=buyTime; $("legue").onclick=toggleLegue; $("resetTurn").onclick=resetTurn;
+$("help").onclick=()=>$("howtoOv").classList.add("show");
+$("howtoClose").onclick=()=>{$("howtoOv").classList.remove("show"); if(!G)newGame();};
+$("ovClose").onclick=()=>{$("overlay").classList.remove("show"); newGame();};
 </script>
 </body>
 </html>

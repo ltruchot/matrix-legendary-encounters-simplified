@@ -21,8 +21,9 @@
 > par OCR des **213 visuels officiels** (`assets/cards/`, source : legendarycardgame.com/matrix). Plus d'hypothèses.
 
 ### 1. Monnaie de départ (decks joueurs)
-Chaque joueur : **3 Unplug (★1)** + **3 There Is No Spoon (griffure 1)** = deck de 6, pioche 5.
-→ Pour 4 joueurs : **12 Unplug + 12 Spoon**. (La boîte en contient 35 + 25 → large.)
+Chaque joueur : **3 Unplug (★1)** + **2 There Is No Spoon (griffure 1)** = deck de 5, pioche 5.
+→ Pour 3 joueurs (max) : **9 Unplug + 6 Spoon**. (La boîte en contient 35 + 25 → large.)
+Règles v2 : achat **sur le dessus du deck**, **★→temps** (3★=+1, max 3/partie), **léguer 1 carte**, **1–3 joueurs**.
 
 ### 2. Le marché (Dock) — **un seul** groupe de héros
 Choisir **1 groupe de 14 cartes** = la pioche du marché. Recommandés (à confirmer en regardant les cartes) :

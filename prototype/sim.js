@@ -4,27 +4,35 @@
 //         node prototype/sim.js final      -> teste la config retenue (table finale)
 
 const STARTERS_BASE=[{star:1,claw:0},{star:0,claw:1}];
+// Marché CURÉ + ICÔNES VÉRIFIÉES À LA MAIN (sur les vraies images). Chaque carte vaut son prix aux icônes.
 const MARKET_POOL=[
- {star:2,claw:0,cost:2,n:2},{star:2,claw:0,cost:3,n:2},{star:2,claw:0,cost:3,n:2},
- {star:1,claw:0,cost:3,n:2},{star:0,claw:2,cost:4,n:2},{star:2,claw:0,cost:4,n:2},
- {star:1,claw:1,cost:4,n:2},{star:0,claw:3,cost:5,n:2},{star:0,claw:3,cost:6,n:1},
- {star:0,claw:4,cost:6,n:1},{star:0,claw:4,cost:7,n:1},{star:2,claw:2,cost:7,n:1},
- {star:2,claw:0,cost:3,n:3}];
+ {star:2,claw:0,cost:2,n:2}, // Dozer
+ {star:2,claw:0,cost:3,n:2}, // Operator
+ {star:2,claw:0,cost:3,n:2}, // I've Spent My Entire Life (Morpheus)
+ {star:2,claw:0,cost:3,n:2}, // Hovercraft Nebuchadnezzar
+ {star:0,claw:2,cost:4,n:2}, // Your Men Are Already Dead (Trinity) — corrigé : griffure (pas ★)
+ {star:0,claw:2,cost:4,n:2}, // Combat Training (Tank)
+ {star:0,claw:3,cost:5,n:2}, // You Think That's Air (Morpheus)
+ {star:0,claw:4,cost:6,n:1}];// It's a Trap (Tank)
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
 
 const rnd=()=>Math.random();
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r};
 
-// P = {np, bossHp, time, hand, unplug, spoon, cap, grace}
+// P = {np, bossHp, time, hand, unplug, spoon, cap, grace, strat, perRound}
 // cap   = nb max d'agents présents (on n'en fait débarquer un que s'il y a de la place)
 // grace = on ne perd du temps que pour les agents AU-DELÀ de ce seuil (combat zone)
+// strat = 'balanced' (achat + cher) | 'nobuy' (jamais d'achat) | 'attack' (achète que la griffure) | 'star' (achète que le ★)
+// perRound = true -> le temps recule une fois par TOUR DE TABLE (toutes les N turns) au lieu de chaque turn
 function play(P){
+  const STRAT=P.strat||'balanced';
   const starter=[];for(let i=0;i<P.unplug;i++)starter.push({star:1,claw:0});for(let i=0;i<P.spoon;i++)starter.push({star:0,claw:1});
   const players=[];for(let i=0;i<P.np;i++)players.push({deck:shuffle(starter.map(c=>({...c}))),discard:[],hand:[]});
   let market=[],mdeck=shuffle(expand(MARKET_POOL));
   for(let i=0;i<4&&mdeck.length;i++)market.push(mdeck.pop());
-  let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time;
+  let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
+  const btMax=P.btMax??99;
   const draw=(p,n)=>{while(p.hand.length<n){if(!p.deck.length){if(!p.discard.length)break;p.deck=shuffle(p.discard);p.discard=[]}p.hand.push(p.deck.pop())}};
   while(true){
     if(turns>300)return{win:false,turns};
@@ -36,9 +44,22 @@ function play(P){
     enemies=enemies.filter(e=>{if(claw>=e.hp){claw-=e.hp;return false}return true});
     if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d}
     if(boss<=0)return{win:true,turns};
-    let buyable=market.filter(c=>c.cost<=star).sort((a,b)=>b.cost-a.cost);
-    if(buyable[0]){const c=buyable[0];star-=c.cost;p.discard.push({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
-    t-=Math.max(0,enemies.length-P.grace);
+    const dest=c=>P.buyToTop?p.deck.push(c):p.discard.push(c); // achat sur le dessus du deck
+    const btCost=P.btCost||3;                                   // ★ pour +1 au Time Track (Buy Time)
+    if(STRAT==='buytime'){ // voie éco/contrôle : convertir ★ en temps (1x/tour, plafond btMax/partie)
+      if(star>=btCost && t<12 && btUses<btMax){ star-=btCost; t++; btUses++; }
+      let pool=market.filter(c=>c.cost<=star && c.claw>0).sort((a,b)=>b.cost-a.cost);
+      if(pool[0]){const c=pool[0];star-=c.cost;dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
+    }else if(STRAT!=='nobuy'){
+      // 'balanced' : si le temps est bas, on en achète un peu ; sinon on recrute la meilleure griffure
+      if(STRAT==='balanced' && t<=3 && star>=btCost && btUses<btMax){ star-=btCost; t++; btUses++; }
+      let pool=market.filter(c=>c.cost<=star);
+      if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0);
+      if(STRAT==='star')pool=pool.filter(c=>c.star>0);
+      pool.sort((a,b)=>b.cost-a.cost);
+      if(pool[0]){const c=pool[0];star-=c.cost;dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
+    }
+    if(!P.perRound || cur===P.np-1) t-=Math.max(0,enemies.length-P.grace);
     if(t<=0)return{win:false,turns};
     cur=(cur+1)%P.np;
   }
@@ -47,14 +68,17 @@ function rate(P,runs){let w=0,tw=0;for(let i=0;i<runs;i++){const r=play(P);if(r.
 
 const runs=4000;
 if(process.argv[2]==="final"){
-  // RÈGLES FIXES retenues : main 5, starter 3 Unplug + 3 Spoon, cap 2 agents, grace 0, Time Track 10.
-  // Difficulté = PV du boss uniquement (8 / 10 / 12, ancrés sur Agent 8/10 et Smith 12).
-  const cfgs=[{label:"🟢 Facile",bossHp:8},{label:"🟡 Normal",bossHp:10},{label:"🔴 Difficile (Smith 12)",bossHp:12}];
-  console.log("FINAL — main5, starter 3 Unplug+3 Spoon, cap2 agents, grace0, Time Track 10");
-  console.log("config                  | J | vict% | tours-joueur moy (parties gagnées)");
-  for(const c of cfgs){for(const np of[1,2,3,4]){
-    const r=rate({np,bossHp:c.bossHp,time:10,hand:5,unplug:3,spoon:3,cap:2,grace:0},runs);
-    console.log(`${c.label.padEnd(23)}| ${np} | ${r.wr.toFixed(0).padStart(3)}%  |  ${r.at.toFixed(1)}`);
+  // RÈGLES v2 : main 5, starter 3 Unplug + 2 Spoon, cap 2 agents, Time Track 10,
+  // achat SUR LE DESSUS du deck, ★->temps (3★=+1, max 3/partie). Difficulté = PV du boss (10/12/14).
+  const base={time:10,hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:true,btCost:3,btMax:3};
+  const cfgs=[{label:"🟢 Facile (Agent 10, t10)",bossHp:10,time:10},{label:"🟡 Normal (Smith 12, t10)",bossHp:12,time:10},{label:"🔴 Difficile (Smith 12, t8)",bossHp:12,time:8}];
+  console.log("FINAL v2 — starter 3U+2S, achat sur le dessus, ★->temps(3★,max3), cap2. Boss+temps = vraies cartes/plateau");
+  console.log("config                    | J | équilibré | rush | éco/contrôle | tours");
+  for(const c of cfgs){for(const np of[1,2,3]){
+    const b=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'balanced'},runs);
+    const a=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'nobuy'},runs);
+    const e=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'buytime'},runs);
+    console.log(`${c.label.padEnd(20)}| ${np} |   ${b.wr.toFixed(0).padStart(3)}%   | ${a.wr.toFixed(0).padStart(3)}% |    ${e.wr.toFixed(0).padStart(3)}%     | ${b.at.toFixed(1)}`);
   }console.log("");}
 }else if(process.argv[2]==="grid"){
   // Règles fixes : hand5, starter 3 Unplug + 3 Spoon, cap2, grace1. On lit boss x time (np2).
@@ -68,6 +92,38 @@ if(process.argv[2]==="final"){
       process.stdout.write(`${r.wr.toFixed(0).padStart(4)}%(${r.at.toFixed(1)})`.padStart(11));}
     console.log();
   }
+}else if(process.argv[2]==="tune"){
+  // Calibrage des NOUVELLES règles : achat sur le dessus (buyToTop), ★->temps (Buy Time), starter réduit.
+  // args : node sim.js tune [unplug] [spoon] [btCost] [time]
+  const U=+(process.argv[3]||3), S=+(process.argv[4]||2), BT=+(process.argv[5]||3), TIME=+(process.argv[6]||10), BTMAX=+(process.argv[7]||3);
+  const base={time:TIME,hand:5,unplug:U,spoon:S,cap:2,grace:0,buyToTop:true,btCost:BT,btMax:BTMAX};
+  console.log(`CALIBRAGE — starter ${U}Unplug+${S}Spoon, achat sur le dessus, ★->temps à ${BT}★ (max ${BTMAX}/partie), Time Track ${TIME}`);
+  console.log("boss | équilibré 1j/2j/3j (vict% , tours) | DIVERSITÉ 1j: agressif / griffure / éco(temps)");
+  for(const boss of[8,10,12,14]){
+    const b1=rate({...base,np:1,bossHp:boss,strat:'balanced'},runs);
+    const b2=rate({...base,np:2,bossHp:boss,strat:'balanced'},runs);
+    const b3=rate({...base,np:3,bossHp:boss,strat:'balanced'},runs);
+    const ag=rate({...base,np:1,bossHp:boss,strat:'nobuy'},runs);
+    const at=rate({...base,np:1,bossHp:boss,strat:'attack'},runs);
+    const ec=rate({...base,np:1,bossHp:boss,strat:'buytime'},runs);
+    console.log(`${String(boss).padStart(3)}  | ${b1.wr.toFixed(0).padStart(3)}%(${b1.at.toFixed(1)}) ${b2.wr.toFixed(0).padStart(3)}%(${b2.at.toFixed(1)}) ${b3.wr.toFixed(0).padStart(3)}%(${b3.at.toFixed(1)}) | agr ${ag.wr.toFixed(0).padStart(3)}% / grif ${at.wr.toFixed(0).padStart(3)}% / éco ${ec.wr.toFixed(0).padStart(3)}%`);
+  }
+}else if(process.argv[2]==="strats"){
+  // Q : y a-t-il plusieurs chemins de victoire ? On compare des stratégies pures.
+  console.log("DIVERSITÉ DES STRATÉGIES — solo, runs "+runs+" — base hand5/starter3-3/cap2/grace0/temps10");
+  console.log("difficulté | nobuy(agressif) | balanced | attack(achète griffure) | star(achète ★)");
+  for(const boss of[8,10,12]){
+    const r=s=>rate({np:1,bossHp:boss,time:10,hand:5,unplug:3,spoon:3,cap:2,grace:0,strat:s},runs);
+    const a=r('nobuy'),b=r('balanced'),c=r('attack'),d=r('star');
+    console.log(`Boss ${String(boss).padStart(2)}    |   ${a.wr.toFixed(0).padStart(3)}% (${a.at.toFixed(1)})   | ${b.wr.toFixed(0).padStart(3)}% (${b.at.toFixed(1)}) |     ${c.wr.toFixed(0).padStart(3)}% (${c.at.toFixed(1)})        |  ${d.wr.toFixed(0).padStart(3)}% (${d.at.toFixed(1)})`);
+  }
+}else if(process.argv[2]==="npdiag"){
+  // Q : pourquoi 1 joueur ≈ 4 joueurs ? On compare horloge PAR TURN vs PAR TOUR DE TABLE.
+  console.log("DIAGNOSTIC NOMBRE DE JOUEURS — boss 10, balanced, runs "+runs);
+  console.log("                         | 1j  | 2j  | 3j  | 4j");
+  const line=(lbl,perRound)=>{let o=lbl.padEnd(25)+"|";for(const np of[1,2,3,4]){const r=rate({np,bossHp:10,time:10,hand:5,unplug:3,spoon:3,cap:2,grace:0,perRound},runs);o+=` ${r.wr.toFixed(0).padStart(2)}% |`}console.log(o)};
+  line("temps -1 par TURN (actuel)",false);
+  line("temps -1 par TOUR DE TABLE",true);
 }else{
   console.log("BALAYAGE (boss 12, np 2, runs "+runs+") — bande 55-78% / 4-8 tours :");
   console.log("hand unplug spoon cap grace time | vict% | tours");

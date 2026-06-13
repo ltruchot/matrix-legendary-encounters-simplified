@@ -1,0 +1,27 @@
+{
+  "name": "matrix-legendary-encounters-simplified",
+  "version": "1.0.0",
+  "description": "Une **version ultra-simplifiée** de *Legendary Encounters: The Matrix* (Upper Deck, 2023), conçue pour un **stand de découverte** :",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ltruchot/matrix-legendary-encounters-simplified.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ltruchot/matrix-legendary-encounters-simplified/issues"
+  },
+  "homepage": "https://github.com/ltruchot/matrix-legendary-encounters-simplified#readme",
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

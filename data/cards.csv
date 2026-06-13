@@ -35,8 +35,8 @@ MorpheusTheMatrix_2Common,hero,I've Spent My Entire Life Looking For You,Hero,2,
 MorpheusTheMatrix_3Common,hero,Welcome To The Real World,Hero,2,0,3,,,Range,Common,,,,Mobilize,Morpheus star 2+
 MorpheusTheMatrix_4Uncommon,hero,You Think That's Air You're Breathing?,Hero,0,3,5,,,Survival,Uncommon,,,,Coordinate,Morpheus heal
 MorpheusTheMatrix_1Rare,hero,EMP,Hero,0,5,8,,,Tech,Rare,,,,Sacrifice,Morpheus defeat machine
-TrinityTheMatrix_3Common,hero,We Think You're Bugged,Hero,1,0,3,,,Intellect,Common,,,,,Trinity
-TrinityTheMatrix_2Common,hero,Your Men Are Already Dead,Hero,2,0,4,,,Strength,Common,,,,,Trinity
+TrinityTheMatrix_3Common,hero,We Think You're Bugged,Hero,0,1,3,,,Range,Common,,,,,Trinity (OCR corrigé: griffure non ★)
+TrinityTheMatrix_2Common,hero,Your Men Are Already Dead,Hero,0,2,4,,,Range,Common,,,,,Trinity (OCR corrigé: griffure non ★)
 TrinityTheMatrix_4Uncommon,hero,Knife Throw,Hero,0,3,6,,,Intellect,Uncommon,,,,Coordinate,Trinity
 TrinityTheMatrix_1Rare,hero,I Love You,Hero,3,3,8,,,Range,Rare,,,,Sacrifice,Trinity heal+draw3
 Tank_2Common,hero,Operator,Hero,2,0,3,,,Tech,Common,,,,,Tank

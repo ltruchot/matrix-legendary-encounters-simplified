@@ -16,30 +16,32 @@
 - **Le Time Track** du plateau, avec son curseur → c'est **l'horloge partagée** (la « vie » de l'équipe).
 - **Pile de menace** : un paquet d'**ennemis face cachée** (set trié, *ennemis uniquement*).
 - **Marché** : **3 cartes héros** face visible (d'un seul groupe de héros simple) + une pioche pour les remplacer.
-- **Deck de départ par joueur** : 6 cartes = **3 « Unplug » (★1)** + **3 « There Is No Spoon » (griffure 1)**.
+- **Deck de départ par joueur** : 5 cartes = **3 « Unplug » (★1)** + **2 « There Is No Spoon » (griffure 1)**.
 
 *(La recette exacte des cartes à sortir est dans `04-selection-cartes.md`.)*
 
 ## Réglages selon la difficulté choisie
 
-**Le Time Track démarre toujours à 10** (la vraie valeur du jeu). Seul le **PV du boss** change :
+**1 à 3 joueurs** (durée stable quel que soit le nombre). La difficulté = **quelle vraie carte boss** +
+**où on place le curseur du Time Track** — et elle détermine *quelle stratégie* est viable :
 
-| | Boss (PV) | Carte boss réelle | Victoire mesurée | Durée |
-|---|---|---|---|---|
-| 🟢 Facile | **8** | un Agent (8 PV) | ~97 % | ~6 tours-joueur |
-| 🟡 Normal | **10** | un Agent (10 PV) | ~83 % | ~7 tours-joueur |
-| 🔴 Difficile | **12** | **Agent Smith** (le vrai, 12 PV) | ~55 % | ~8 tours-joueur |
+| | Boss (vraie carte) | Time Track | Foncer | Équilibré | Éco/contrôle | Durée |
+|---|---|---|---|---|---|---|
+| 🟢 Facile | **Agent** (10 PV) | 10 | 98 % | 100 % | 100 % | ~6 tours |
+| 🟡 Normal | **Agent Smith** (12 PV) | 10 | **63 %** | 97 % | 100 % | ~7 tours |
+| 🔴 Difficile | **Agent Smith** (12 PV) | **8** | **4 %** | 64 % | 89 % | ~7 tours |
 
-> 3 niveaux = **3 parties différentes** à rejouer. On ne joue **qu'un seul boss** par partie de 5 min.
-> (Taux de victoire = bot optimal ; un humain débutant sera un peu en dessous → marge « partir content ».)
+> 🎯 En **facile**, foncer suffit. En **normal**, foncer devient un pari (62 %) — investir paie. En **difficile**,
+> **l'économie est indispensable** (foncer = 4 %). 3 vraies stratégies, validées sur 5000 parties/config
+> (`prototype/sim.js final`). On joue **un seul boss** par partie de 5 min.
 
 ## Mise en place (~45 s)
 
-1. Boss au centre, marqueur de PV sur la valeur du tableau (8 / 10 / 12).
-2. Curseur du Time Track sur **10**.
+1. Boss au centre (Agent **10** ou Agent Smith **12** selon la difficulté), marqueur de PV sur sa valeur.
+2. Curseur du Time Track sur **10** (ou **8** en difficile).
 3. La pile de menace, face cachée, à côté du boss.
 4. **4 héros** du marché, face visible.
-5. Chaque joueur mélange son deck de 6 et **pioche 5 cartes**.
+5. Chaque joueur mélange son deck de 5 et **pioche 5 cartes**.
 
 ## Le tour d'un joueur (toujours le même, très court)
 
@@ -53,12 +55,16 @@
 3. **Dépense, dans l'ordre que tu veux :**
    - **griffure → frapper.** Retire des PV au **boss** et/ou **tue des agents** présents
      (dépense exactement leur chiffre → la carte part dans la défausse des ennemis).
-   - **★ → acheter.** Prends **1 carte du marché** en payant son **coût** (chiffre bas-droit) ;
-     elle va dans **ta défausse**. Remplace-la aussitôt par la pioche du marché.
-4. **Le temps file.** Pour **chaque agent encore vivant** sur la table (boss exclu),
-   recule le curseur du **Time Track de 1**.
-5. **Fin du tour.** Défausse ce que tu as joué + le reste de ta main, puis **repioche 5 cartes**
-   (deck vide → mélange ta défausse pour refaire un deck).
+   - **★ → recruter.** Prends **1 carte du marché** en payant son **coût** (chiffre bas-droit) ;
+     elle se pose **sur le dessus de ton deck** (tu la joues dès **ton prochain tour**). Remplace-la au marché.
+   - **★ → gagner du temps** *(Buy Time)* : paie **3★** pour remonter le **Time Track de +1**.
+     Maximum **3 fois par partie** (c'est un secours, pas un moteur).
+4. **Léguer (0 ou 1 carte).** Tu peux donner **1 carte non jouée** au **joueur suivant** : elle se pose sur
+   **le dessus de son deck** (il la jouera à son tour). *En solo : garde-la pour ton prochain tour.*
+   → entraide / coup de pouce économique, et un peu d'interaction.
+5. **Le temps file.** Pour **chaque agent encore vivant** (boss exclu), recule le **Time Track de 1**.
+6. **Fin du tour.** Défausse ce que tu as joué + le reste de ta main, puis **repioche 5 cartes**
+   (deck vide → mélange ta défausse).
 
 Le joueur suivant (sens horaire) enchaîne.
 
@@ -88,9 +94,11 @@ Le joueur suivant (sens horaire) enchaîne.
    1. Si < 2 agents : retourne 1 agent (pile de menace).
    2. Joue toute ta main.
    3. ╱╱╱ griffure = frapper le boss / tuer les agents
-      ★    étoile   = acheter 1 carte (prix = chiffre en bas à droite)
-   4. Chaque agent encore vivant → le TEMPS recule de 1.
-   5. Défausse, repioche 5.
+      ★ = recruter 1 carte (→ sur ton deck, jouée au prochain tour)
+          OU gagner du temps (3★ = +1, max 3x)
+   4. Tu peux léguer 1 carte au joueur suivant (solo : la garder).
+   5. Chaque agent encore vivant → le TEMPS recule de 1.
+   6. Défausse, repioche 5.
 
   GAGNÉ : boss à 0 PV.   PERDU : le temps à 0.
   ⛔ Le texte ne compte pas — regarde les symboles.

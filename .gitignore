@@ -5,5 +5,11 @@ assets/rulebooks/*.pdf
 assets/photos-cartes/*
 !assets/photos-cartes/.gitkeep
 
+# Dépendances de test (Playwright) — régénérables via npm i
+node_modules/
+
+# Screenshots de test (régénérés par tests/e2e.js)
+tests/shots/
+
 # Divers
 .DS_Store
