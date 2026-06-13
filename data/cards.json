@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "source": "OCR des 213 visuels officiels de legendarycardgame.com/matrix (téléchargés dans assets/cards/)",
+    "date": "2026-06-13",
+    "icones": {
+      "star": "Recruit (★) — sert à acheter des héros",
+      "claw": "Attack (griffure) — sert à scanner et à frapper/tuer",
+      "cost": "prix d'achat en ★ (coin bas-droit des héros)",
+      "enemy_hp": "claw d'un ennemi = Attack à dépenser pour le vaincre (◎ = invincible par le texte, ignoré ici)",
+      "strike_dmg": "dégâts d'une carte Strike"
+    },
+    "note": "Le '+' (ex 2+) = bonus conditionnel via texte (ignoré dans le jeu découverte). '◎' = effet texte (Undefeatable/Evade...) ignoré ; on utilise le PV imprimé s'il existe."
+  },
+  "starters": [
+    {"name": "Unplug", "star": 1, "claw": 0, "cost": 0, "copies_box": 35},
+    {"name": "There Is No Spoon", "star": 0, "claw": 1, "cost": 0, "copies_box": 25},
+    {"name": "Free Your Mind", "star": 0, "claw": 0, "cost": 0, "copies_box": 5, "note": "capacité d'Avatar (texte) — NON utilisée"}
+  ],
+  "hovercrafts": [
+    {"name": "The Vigilant", "star": 2, "claw": 0, "cost": 3, "class": "Intellect"},
+    {"name": "The Nebuchadnezzar", "star": 2, "claw": 0, "cost": 3, "class": "Tech"},
+    {"name": "The Caduceus", "star": 2, "claw": 0, "cost": 3, "class": "Range"},
+    {"name": "The Mjolnir", "star": 2, "claw": 0, "cost": 3, "class": "Strength"},
+    {"name": "The Lagos", "star": 2, "claw": 0, "cost": 3, "class": "Survival"}
+  ],
+  "strikes": [
+    {"name": "Blinded", "dmg": 0, "note": "couvre l'Acte"},
+    {"name": "I've Never Seen Anyone Move That Fast", "dmg": 0, "note": "défausse"},
+    {"name": "They're Not Moving", "dmg": 1},
+    {"name": "Wasn't Fast Enough", "dmg": 1},
+    {"name": "The Mind Makes It Real", "dmg": 2},
+    {"name": "He's Killing Him", "dmg": 3},
+    {"name": "Goodbye, Mister Anderson", "dmg": 4},
+    {"name": "Incoming!", "dmg": 4},
+    {"name": "One Of You Is Going To Die", "dmg": 5},
+    {"name": "Not Like This", "dmg": 0, "note": "défait un héros (texte)"}
+  ],
+  "heroes": {
+    "Morpheus (The Matrix)": [
+      {"name": "I've Spent My Entire Life Looking For You", "star": 2, "claw": 0, "cost": 3, "class": "Strength", "rarity": "Common"},
+      {"name": "Welcome To The Real World", "star": 2, "claw": 0, "cost": 3, "class": "Range", "rarity": "Common", "kw": "Mobilize"},
+      {"name": "You Think That's Air You're Breathing?", "star": 0, "claw": 3, "cost": 5, "class": "Survival", "rarity": "Uncommon"},
+      {"name": "EMP", "star": 0, "claw": 5, "cost": 8, "class": "Tech", "rarity": "Rare", "kw": "Sacrifice"}
+    ],
+    "Trinity (The Matrix)": [
+      {"name": "We Think You're Bugged", "star": 1, "claw": 0, "cost": 3, "class": "Intellect", "rarity": "Common"},
+      {"name": "Your Men Are Already Dead", "star": 2, "claw": 0, "cost": 4, "class": "Strength", "rarity": "Common"},
+      {"name": "Knife Throw", "star": 0, "claw": 3, "cost": 6, "class": "Intellect", "rarity": "Uncommon", "kw": "Coordinate"},
+      {"name": "I Love You", "star": 3, "claw": 3, "cost": 8, "class": "Range", "rarity": "Rare", "kw": "Sacrifice"}
+    ],
+    "Tank": [
+      {"name": "Operator", "star": 2, "claw": 0, "cost": 3, "class": "Tech", "rarity": "Common"},
+      {"name": "Combat Training", "star": 0, "claw": 2, "cost": 4, "class": "Survival", "rarity": "Common", "kw": "Coordinate"},
+      {"name": "It's A Trap, Get Out!", "star": 0, "claw": 4, "cost": 6, "class": "Tech", "rarity": "Uncommon", "kw": "Coordinate"},
+      {"name": "Breakfast Of Champions", "star": 2, "claw": 2, "cost": 7, "class": "Strength", "rarity": "Rare"}
+    ],
+    "The Nebuchadnezzar Crew": [
+      {"name": "Dozer", "star": 2, "claw": 0, "cost": 2, "class": "Strength", "rarity": "Common", "kw": "Coordinate"},
+      {"name": "Mouse", "star": 1, "claw": 1, "cost": 4, "class": "Tech", "rarity": "Common", "kw": "Coordinate"},
+      {"name": "Switch", "star": 3, "claw": 3, "cost": 5, "class": "Survival", "rarity": "Uncommon", "note": "CHOISIR +3★ OU +3 griffure"},
+      {"name": "Apoc", "star": 0, "claw": 4, "cost": 7, "class": "Intellect", "rarity": "Rare", "kw": "Coordinate"}
+    ],
+    "_autres_films": "Voir assets/cards/ pour Neo/Morpheus/Trinity (Reloaded/Revolutions), Ship Captains, Niobe, Link, Defenders of Zion — stats dans docs/06."
+  },
+  "generic_enemies_part_of_system": [
+    {"name": "Security Guard", "hp": 1, "type": "Human"},
+    {"name": "Tactical Police", "hp": 2, "type": "Human"},
+    {"name": "Soldier", "hp": 3, "type": "Human"},
+    {"name": "Bug", "hp": null, "note": "carte poubelle/événement — défausse"}
+  ],
+  "enemies_the_matrix_film": [
+    {"name": "Police Officer", "hp": 3, "act": 1},
+    {"name": "Agent Brown", "hp": 8, "act": 1, "kw": "Chase"},
+    {"name": "Military Guard", "hp": 6, "act": 3},
+    {"name": "Agent Jones", "hp": 8, "act": 3},
+    {"name": "Agent Brown (Act3)", "hp": 8, "act": 3},
+    {"name": "Cypher", "hp": 5, "act": 3, "note": "ne frappe pas"}
+  ],
+  "bosses_agent_smith": [
+    {"name": "Smith (Act1, Oracle's Call)", "hp": 2, "tier": "intro"},
+    {"name": "Agent Smith (The Matrix, final)", "hp": 12, "tier": "normal", "note": "LE boss canonique du 1er film"},
+    {"name": "Oracle-Smith (Revolutions)", "hp": 15, "tier": "hard"},
+    {"name": "Agent (The Source)", "hp": 10, "tier": "hard", "kw": "Double Strike"},
+    {"name": "Tow Bomb Sentinels (The Source)", "hp": 20, "tier": "extreme"},
+    {"name": "Bane (Revolutions)", "hp": 7, "tier": "mini"}
+  ],
+  "avatars": [
+    {"name": "Thomas Anderson/Neo", "health": 12, "speed": 5, "rank": 1},
+    {"name": "Neo (Reloaded)", "health": 12, "speed": 4, "rank": 1},
+    {"name": "Neo (Revolutions)", "health": 12, "speed": 4, "rank": 1},
+    {"name": "Morpheus (Matrix)", "health": 11, "speed": 5, "rank": 2},
+    {"name": "Morpheus (Rel/Rev)", "health": 11, "speed": 4, "rank": 2},
+    {"name": "Trinity (Matrix)", "health": 11, "speed": 5, "rank": 3},
+    {"name": "Trinity (Rel/Rev)", "health": 11, "speed": 4, "rank": 3},
+    {"name": "Niobe", "health": 11, "speed": 4, "rank": 4},
+    {"name": "Switch", "health": 10, "speed": 3, "rank": 4},
+    {"name": "Apoc", "health": 10, "speed": 4, "rank": 5},
+    {"name": "Soren", "health": 10, "speed": 3, "rank": 5},
+    {"name": "Roland", "health": 10, "speed": 4, "rank": 6},
+    {"name": "Mouse", "health": 9, "speed": 4, "rank": 6}
+  ]
+}

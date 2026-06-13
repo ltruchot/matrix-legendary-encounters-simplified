@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATRIX 5 — Prototype jouable</title>
+<style>
+  :root{--green:#19ff7a;--bg:#04140a;--panel:#0a2417;--line:#1c5c38;--gold:#ffd23a;--red:#ff4d4d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:#d9ffe9;font-family:"Segoe UI",system-ui,sans-serif;font-size:14px}
+  h1{font-size:20px;margin:0;letter-spacing:3px;color:var(--green);text-shadow:0 0 8px #0f8}
+  header{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:#06190e;position:sticky;top:0;z-index:5}
+  header .sp{flex:1}
+  select,button{background:#0a2417;color:#d9ffe9;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
+  button.primary{background:var(--green);color:#042;border:none;font-weight:700}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  .wrap{display:grid;grid-template-columns:230px 1fr;gap:12px;padding:12px;max-width:1280px;margin:0 auto}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .stat{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:15px}
+  .big{font-size:30px;font-weight:800;line-height:1}
+  .time .big{color:var(--gold)} .boss .big{color:var(--red)}
+  .pool{display:flex;gap:14px;margin-top:6px}
+  .chip{background:#06210f;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:16px;font-weight:700}
+  .chip .lbl{font-size:11px;font-weight:400;opacity:.7;display:block}
+  .row-title{margin:14px 0 6px;color:var(--green);font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+  .cards{display:flex;gap:8px;flex-wrap:wrap;min-height:10px}
+  .card{width:96px;border-radius:7px;overflow:hidden;border:2px solid #0c3;position:relative;cursor:pointer;transition:transform .08s;background:#000}
+  .card:hover{transform:translateY(-4px)}
+  .card img{width:100%;display:block}
+  .card.dis{filter:grayscale(.7) brightness(.55);cursor:not-allowed}
+  .card.played{opacity:.5}
+  .card .tag{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.72);font-size:11px;padding:2px 4px;text-align:center}
+  .card.enemy{border-color:var(--red)} .card.market{border-color:var(--gold)}
+  .badge{position:absolute;top:3px;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#000}
+  .b-star{right:3px;background:var(--gold)} .b-claw{left:3px;background:#ff7a7a} .b-cost{right:3px;top:auto;bottom:24px;background:#fff}
+  .boss-card{display:flex;gap:12px;align-items:center}
+  .boss-card img{width:120px;border:2px solid var(--red);border-radius:8px}
+  #log{height:120px;overflow:auto;font-size:12px;line-height:1.5;background:#06190e;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:10px}
+  #log b{color:var(--green)}
+  .overlay{position:fixed;inset:0;background:rgba(0,10,4,.93);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:20;text-align:center}
+  .overlay.show{display:flex}
+  .overlay h2{font-size:42px;margin:0 0 10px}
+  .win h2{color:var(--green)} .lose h2{color:var(--red)}
+  .hint{opacity:.7;font-size:12px;margin-top:4px}
+  .pcount{display:flex;gap:6px;flex-wrap:wrap}
+  .ptab{padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px}
+  .ptab.active{background:var(--green);color:#042;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>MATRIX&nbsp;5</h1>
+  <span class="hint">prototype — vraies cartes &amp; vraies stats. Le texte ne compte pas : ★ achète, griffure frappe.</span>
+  <span class="sp"></span>
+  <label>Difficulté
+    <select id="diff">
+      <option value="8">🟢 Facile (Boss 8)</option>
+      <option value="10" selected>🟡 Normal (Boss 10)</option>
+      <option value="12">🔴 Difficile (Smith 12)</option>
+    </select>
+  </label>
+  <label>Joueurs
+    <select id="np"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+  </label>
+  <label>Time Track
+    <select id="tt"><option>8</option><option>9</option><option selected>10</option><option>11</option><option>12</option></select>
+  </label>
+  <button class="primary" id="newgame">Nouvelle partie</button>
+</header>
+
+<div class="wrap">
+  <!-- Colonne gauche : état -->
+  <div>
+    <div class="panel time">
+      <div class="stat"><span>⏳ Time Track</span><span class="big" id="timeVal">–</span></div>
+      <div class="hint">Tombe à 0 = les machines gagnent.</div>
+    </div>
+    <div class="panel boss" style="margin-top:10px">
+      <div class="stat"><span>🕶️ Boss — PV</span><span class="big" id="bossHp">–</span></div>
+      <div class="boss-card"><img id="bossImg" alt="boss"><div class="hint" id="bossName"></div></div>
+    </div>
+    <div class="panel" style="margin-top:10px">
+      <div class="stat"><b id="curPlayer">—</b></div>
+      <div class="pcount" id="pTabs"></div>
+      <div class="pool">
+        <div class="chip"><span class="lbl">★ étoiles</span><span id="poolStar">0</span></div>
+        <div class="chip"><span class="lbl">griffure</span><span id="poolClaw">0</span></div>
+      </div>
+      <button class="primary" id="endTurn" style="width:100%;margin-top:10px">Fin du tour ▶</button>
+      <div class="hint" style="margin-top:6px">Joue ta main, dépense, puis finis le tour. Les ennemis encore vivants font reculer le temps.</div>
+    </div>
+  </div>
+
+  <!-- Colonne droite : plateau -->
+  <div class="panel">
+    <div class="row-title">Agents sur la table <span class="hint">(clique pour tuer : il faut assez de griffure)</span></div>
+    <div class="cards" id="enemies"></div>
+
+    <div class="row-title">🕶️ Boss <span class="hint">(clique pour frapper avec ta griffure)</span></div>
+    <div class="cards"><div class="card market" id="bossAttack" style="border-color:var(--red);width:80px"><div class="tag">Frapper le boss</div><div style="height:60px;display:flex;align-items:center;justify-content:center;font-size:28px">🎯</div></div></div>
+
+    <div class="row-title">Marché <span class="hint">(clique pour acheter avec tes ★ — coût = pastille blanche)</span></div>
+    <div class="cards" id="market"></div>
+
+    <div class="row-title">Ta main <span class="hint">(clique pour jouer)</span></div>
+    <div class="cards" id="hand"></div>
+
+    <div id="log"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"><h2 id="ovTitle"></h2><div id="ovText" class="hint"></div><button class="primary" style="margin-top:16px" onclick="document.getElementById('overlay').classList.remove('show')">Fermer</button></div>
+
+<script>
+const IMG = "../assets/cards/";
+// ---- DONNÉES RÉELLES (extraites des visuels officiels — voir data/cards.csv) ----
+const STARTERS = [
+  {name:"Unplug", star:1, claw:0, img:"StarterUnplug.jpg", n:3},
+  {name:"There Is No Spoon", star:0, claw:1, img:"StarterThereIsNoSpoon.jpg", n:3},
+];
+const CAP_AGENTS = 2; // au plus 2 agents en jeu (équilibrage validé par sim)
+const HAND = 5;
+// Marché : héros à valeurs FIXES uniquement (icônes pures, pas de texte conditionnel)
+const MARKET_POOL = [
+  {name:"Dozer", star:2, claw:0, cost:2, img:"NebuchadnezzarCrew_2Common.jpg", n:2},
+  {name:"Operator", star:2, claw:0, cost:3, img:"Tank_2Common.jpg", n:2},
+  {name:"Welcome to the Real World", star:2, claw:0, cost:3, img:"MorpheusTheMatrix_2Common.jpg", n:2},
+  {name:"We Think You're Bugged", star:1, claw:0, cost:3, img:"TrinityTheMatrix_3Common.jpg", n:2},
+  {name:"Combat Training", star:0, claw:2, cost:4, img:"Tank_3Common.jpg", n:2},
+  {name:"Your Men Are Already Dead", star:2, claw:0, cost:4, img:"TrinityTheMatrix_2Common.jpg", n:2},
+  {name:"Mouse", star:1, claw:1, cost:4, img:"NebuchadnezzarCrew_3Common.jpg", n:2},
+  {name:"You Think That's Air", star:0, claw:3, cost:5, img:"MorpheusTheMatrix_4Uncommon.jpg", n:2},
+  {name:"Knife Throw", star:0, claw:3, cost:6, img:"TrinityTheMatrix_4Uncommon.jpg", n:1},
+  {name:"It's a Trap!", star:0, claw:4, cost:6, img:"Tank_4Uncommon.jpg", n:1},
+  {name:"Apoc", star:0, claw:4, cost:7, img:"NebuchadnezzarCrew_1Rare.jpg", n:1},
+  {name:"Breakfast of Champions", star:2, claw:2, cost:7, img:"Tank_1RAre.jpg", n:1},
+  {name:"Hovercraft", star:2, claw:0, cost:3, img:"HovercraftTheNebuchadnezzar.jpg", n:3},
+];
+// Pile de menace : ennemis à PV fixes, escalade
+const ENEMY_POOL = [
+  {name:"Security Guard", hp:1, img:"PartOfTheSystem-SecurityGuard.jpg", n:3},
+  {name:"Tactical Police", hp:2, img:"PartOfTheSystem-TacticalPolice.jpg", n:3},
+  {name:"Soldier", hp:3, img:"PartOfTheSystem-Soldier.jpg", n:2},
+  {name:"Police Officer", hp:3, img:"Act1WhatIsTheMatrix_1.jpg", n:2},
+  {name:"Cypher", hp:5, img:"Act3HeIsTheOne_6.jpg", n:1},
+  {name:"Military Guard", hp:6, img:"Act3HeIsTheOne_1.jpg", n:1},
+  {name:"Agent Jones", hp:8, img:"Act3HeIsTheOne_2.jpg", n:1},
+];
+const BOSS = {name:"Agent Smith", img:"Act3HeIsTheOneExtra_9.jpg"};
+
+// ---- ÉTAT ----
+let G=null;
+const $=id=>document.getElementById(id);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function expand(pool){const r=[];pool.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r}
+
+function newGame(){
+  const np=+$("np").value, bossHp=+$("diff").value, time=+$("tt").value;
+  const players=[];
+  for(let i=0;i<np;i++){
+    let deck=shuffle(expand(STARTERS));
+    players.push({id:i, deck, discard:[], hand:[], played:[]});
+  }
+  G={players, cur:0, time, bossHp, bossMax:bossHp, star:0, claw:0,
+     market:[], marketDeck:shuffle(expand(MARKET_POOL)),
+     threat:shuffle(expand(ENEMY_POOL)), enemies:[], over:false};
+  for(let i=0;i<4;i++) refillMarket();
+  $("bossImg").src=IMG+BOSS.img; $("bossName").textContent=BOSS.name;
+  $("overlay").classList.remove("show");
+  log(`<b>Nouvelle partie</b> — ${np} joueur(s), boss ${bossHp} PV, temps ${time}.`);
+  startTurn();
+}
+function refillMarket(){ if(G.marketDeck.length) G.market.push(G.marketDeck.pop()); }
+
+function startTurn(){
+  const p=G.players[G.cur];
+  drawTo(p,HAND);
+  G.star=0; G.claw=0;
+  p.played=[];
+  // un agent débarque SEULEMENT s'il y a de la place (max 2 sur la table)
+  if(G.threat.length && G.enemies.length<CAP_AGENTS){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
+  else if(!G.threat.length) log("Plus d'agents dans la pile de menace.");
+  else log(`La table est pleine (max ${CAP_AGENTS} agents) — aucun nouvel agent.`);
+  render();
+}
+function drawTo(p,n){
+  while(p.hand.length<n){
+    if(!p.deck.length){ if(!p.discard.length) break; p.deck=shuffle(p.discard); p.discard=[]; }
+    p.hand.push(p.deck.pop());
+  }
+}
+function playCard(idx){
+  const p=G.players[G.cur]; const c=p.hand[idx]; if(!c) return;
+  G.star+=c.star; G.claw+=c.claw;
+  p.played.push(c); p.hand.splice(idx,1);
+  render();
+}
+function attackBoss(){
+  if(G.over) return;
+  if(G.claw<=0){flash("Pas de griffure à dépenser.");return;}
+  const dmg=Math.min(G.claw, G.bossHp);
+  G.claw-=dmg; G.bossHp-=dmg;
+  log(`Tu frappes le boss : -${dmg} PV (reste ${G.bossHp}).`);
+  if(G.bossHp<=0) return end(true);
+  render();
+}
+function killEnemy(uid){
+  const e=G.enemies.find(x=>x.uid===uid); if(!e) return;
+  if(G.claw<e.hp){flash(`Il faut ${e.hp} griffure pour tuer ${e.name} (tu as ${G.claw}).`);return;}
+  G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid);
+  log(`Tu élimines <b>${e.name}</b> (-${e.hp} griffure).`);
+  render();
+}
+function buy(idx){
+  const c=G.market[idx]; if(!c) return;
+  if(G.star<c.cost){flash(`Il faut ${c.cost}★ (tu as ${G.star}).`);return;}
+  G.star-=c.cost; G.players[G.cur].discard.push({...c});
+  G.market.splice(idx,1); refillMarket();
+  log(`Tu recrutes <b>${c.name}</b> (-${c.cost}★).`);
+  render();
+}
+function endTurn(){
+  if(G.over) return;
+  const p=G.players[G.cur];
+  // ennemis survivants -> temps
+  const surv=G.enemies.length;
+  if(surv){ G.time-=surv; log(`${surv} agent(s) en vie → <b>temps -${surv}</b> (reste ${G.time}).`); }
+  if(G.time<=0) return end(false);
+  // cleanup
+  p.discard.push(...p.played, ...p.hand); p.played=[]; p.hand=[];
+  G.cur=(G.cur+1)%G.players.length;
+  startTurn();
+}
+function end(win){
+  G.over=true; render();
+  $("overlay").className="overlay show "+(win?"win":"lose");
+  $("ovTitle").textContent=win?"VICTOIRE 🟢":"DÉFAITE 💀";
+  $("ovText").textContent=win?"Vous avez libéré la Matrice ! (boss à 0)":"Les machines ont gagné (temps à 0).";
+}
+
+// ---- RENDU ----
+function badge(cls,val){return `<div class="badge ${cls}">${val}</div>`}
+function render(){
+  if(!G) return;
+  $("timeVal").textContent=G.time;
+  $("bossHp").textContent=G.bossHp+" / "+G.bossMax;
+  $("poolStar").textContent=G.star; $("poolClaw").textContent=G.claw;
+  $("curPlayer").textContent="🎮 Tour du Joueur "+(G.cur+1);
+  // onglets joueurs
+  $("pTabs").innerHTML=G.players.map((p,i)=>`<span class="ptab ${i===G.cur?'active':''}">J${i+1} · deck ${p.deck.length+p.discard.length}</span>`).join("");
+  // ennemis
+  $("enemies").innerHTML=G.enemies.map(e=>{
+    const ok=G.claw>=e.hp && !G.over;
+    return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">
+      ${badge('b-claw',e.hp)}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;
+  }).join("") || '<span class="hint">aucun agent</span>';
+  // marché
+  $("market").innerHTML=G.market.map((c,i)=>{
+    const ok=G.star>=c.cost && !G.over;
+    return `<div class="card market ${ok?'':'dis'}" onclick="buy(${i})">
+      ${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',c.cost)}
+      <img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;
+  }).join("");
+  // main
+  const p=G.players[G.cur];
+  $("hand").innerHTML=p.hand.map((c,i)=>`<div class="card ${G.over?'dis':''}" onclick="playCard(${i})">
+      ${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}
+      <img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`).join("")
+    + p.played.map(c=>`<div class="card played"><img src="${IMG}${c.img}"><div class="tag">joué</div></div>`).join("");
+  $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
+}
+let logbuf=[];
+function log(m){logbuf.unshift(m); $("log").innerHTML=logbuf.slice(0,40).map(x=>"• "+x).join("<br>");}
+function flash(m){log("⚠️ "+m);}
+
+$("newgame").onclick=newGame;
+$("endTurn").onclick=endTurn;
+$("bossAttack").onclick=attackBoss;
+newGame();
+</script>
+</body>
+</html>

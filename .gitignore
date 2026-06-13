@@ -1,0 +1,9 @@
+# Règlements officiels Upper Deck = sous copyright → on les garde en local, on ne les pousse pas
+assets/rulebooks/*.pdf
+
+# Photos des cartes physiques (référence de travail, local)
+assets/photos-cartes/*
+!assets/photos-cartes/.gitkeep
+
+# Divers
+.DS_Store

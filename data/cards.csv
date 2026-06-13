@@ -1,0 +1,213 @@
+file,category,name,type,star,claw,cost,enemy_hp,strike_dmg,class,rarity,health,speed,rank,keywords,note
+StarterUnplug,starter,Unplug,Hero,1,0,0,,,,,,,,,base recruit
+StarterThereIsNoSpoon,starter,There Is No Spoon,Hero,0,1,0,,,,,,,,,base attack
+StarterFreeYourMind,starter,Free Your Mind,Hero,0,0,0,,,,,,,,,avatar ability (NON utilisé)
+HovercraftTheVigilant,hovercraft,The Vigilant,Hovercraft,2,0,3,,,Intellect,,,,,Coordinate,
+HovercraftTheNebuchadnezzar,hovercraft,The Nebuchadnezzar,Hovercraft,2,0,3,,,Tech,,,,,Coordinate,
+HovercraftTheCaduceus,hovercraft,The Caduceus,Hovercraft,2,0,3,,,Range,,,,,Coordinate,
+HovercraftTheMjolnir,hovercraft,The Mjolnir,Hovercraft,2,0,3,,,Strength,,,,,Coordinate,
+HovercraftTheLagos,hovercraft,The Lagos,Hovercraft,2,0,3,,,Survival,,,,,Coordinate,
+StrikeBlinded,strike,Blinded,Strike,,,,,0,,,,,,,couvre l'acte
+StrikeIveNeverSeenAnyoneMoveThatFast,strike,I've Never Seen Anyone Move That Fast,Strike,,,,,0,,,,,,,défausse
+StrikeTheyreNotMoving,strike,They're Not Moving,Strike,,,,,1,,,,,,,others draw
+StrikeWasntFastEnough,strike,Wasn't Fast Enough,Strike,,,,,1,,,,,,,
+StrikeTheMindMakesItReal,strike,The Mind Makes It Real,Strike,,,,,2,,,,,,,
+StrikeHesKillingHim,strike,He's Killing Him,Strike,,,,,3,,,,,,,
+StrikeGoodbyeMrAnderson,strike,"Goodbye, Mister Anderson",Strike,,,,,4,,,,,,,
+StrikeIncoming,strike,Incoming!,Strike,,,,,4,,,,,,,time track
+StrikeOneOfYouIsGoingToDie,strike,One Of You Is Going To Die,Strike,,,,,5,,,,,,,
+StrikeNotLikeThis,strike,Not Like This,Strike,,,,,0,,,,,,,defeat hero
+AvatarThomasAnderson,avatar,Thomas Anderson,Avatar,,,,,,,,12,5,1,,flips to Neo
+AvatarThomasAnderson-Neo,avatar,Neo,Avatar,,,,,,,,12,5,1,,flip side
+AvatarNeoReloaded,avatar,Neo (Reloaded),Avatar,,,,,,,,12,4,1,,
+AvatarNeoRevolutions,avatar,Neo (Revolutions),Avatar,,,,,,,,12,4,1,,
+AvatarMorpheusMatrix,avatar,Morpheus (Matrix),Avatar,,,,,,,,11,5,2,,
+AvatarMorpheusRelRev,avatar,Morpheus (Rel/Rev),Avatar,,,,,,,,11,4,2,,
+AvatarTrinityMatrix,avatar,Trinity (Matrix),Avatar,,,,,,,,11,5,3,,
+AvatarTrinityRelRev,avatar,Trinity (Rel/Rev),Avatar,,,,,,,,11,4,3,,
+AvatarNiobe,avatar,Niobe,Avatar,,,,,,,,11,4,4,,
+AvatarSwitch,avatar,Switch,Avatar,,,,,,,,10,3,4,,
+AvatarApoc,avatar,Apoc,Avatar,,,,,,,,10,4,5,,
+AvatarSoren,avatar,Soren,Avatar,,,,,,,,10,3,5,,
+AvatarRoland,avatar,Roland,Avatar,,,,,,,,10,4,6,,
+AvatarMouse,avatar,Mouse,Avatar,,,,,,,,9,4,6,,
+MorpheusTheMatrix_2Common,hero,I've Spent My Entire Life Looking For You,Hero,2,0,3,,,Strength,Common,,,,,Morpheus
+MorpheusTheMatrix_3Common,hero,Welcome To The Real World,Hero,2,0,3,,,Range,Common,,,,Mobilize,Morpheus star 2+
+MorpheusTheMatrix_4Uncommon,hero,You Think That's Air You're Breathing?,Hero,0,3,5,,,Survival,Uncommon,,,,Coordinate,Morpheus heal
+MorpheusTheMatrix_1Rare,hero,EMP,Hero,0,5,8,,,Tech,Rare,,,,Sacrifice,Morpheus defeat machine
+TrinityTheMatrix_3Common,hero,We Think You're Bugged,Hero,1,0,3,,,Intellect,Common,,,,,Trinity
+TrinityTheMatrix_2Common,hero,Your Men Are Already Dead,Hero,2,0,4,,,Strength,Common,,,,,Trinity
+TrinityTheMatrix_4Uncommon,hero,Knife Throw,Hero,0,3,6,,,Intellect,Uncommon,,,,Coordinate,Trinity
+TrinityTheMatrix_1Rare,hero,I Love You,Hero,3,3,8,,,Range,Rare,,,,Sacrifice,Trinity heal+draw3
+Tank_2Common,hero,Operator,Hero,2,0,3,,,Tech,Common,,,,,Tank
+Tank_3Common,hero,Combat Training,Hero,0,2,4,,,Survival,Common,,,,Coordinate,Tank
+Tank_4Uncommon,hero,"It's A Trap, Get Out!",Hero,0,4,6,,,Tech,Uncommon,,,,Coordinate,Tank
+Tank_1RAre,hero,Breakfast Of Champions,Hero,2,2,7,,,Strength,Rare,,,,,Tank heal
+NebuchadnezzarCrew_2Common,hero,Dozer,Hero,2,0,2,,,Strength,Common,,,,Coordinate,Nebuchadnezzar
+NebuchadnezzarCrew_3Common,hero,Mouse,Hero,1,1,4,,,Tech,Common,,,,Coordinate,Nebuchadnezzar
+NebuchadnezzarCrew_4Uncommon,hero,Switch,Hero,3,3,5,,,Survival,Uncommon,,,,,CHOISIR +3star OU +3claw
+NebuchadnezzarCrew_1Rare,hero,Apoc,Hero,0,4,7,,,Intellect,Rare,,,,Coordinate,Nebuchadnezzar
+NeoReloaded_2Common,hero,Brawl,Hero,0,2,3,,,Strength,Common,,,,,Neo +1/enemy (claw 2+)
+NeoReloaded_3Common,hero,Doing His Superman Thing,Hero,2,0,4,,,Range,Common,,,,,Neo
+NeoReloaded_4Uncommon,hero,The Bullet Is Still Inside,Hero,0,3,6,,,Strength,Uncommon,,,,,Neo heal
+NeoReloaded_1Rare,hero,I'll Handle Them,Hero,8,6,8,,,Strength,Rare,,,,,Neo big
+MorpheusRelRev_2Common,hero,Some Of You Believe As I Believe,Hero,2,0,3,,,Survival,Common,,,,,Morpheus
+MorpheusRelRev_3Common,hero,Towering Leap,Hero,2,0,4,,,Intellect,Common,,,,,Morpheus
+MorpheusRelRev_4Uncommon,hero,"Zion, Hear Me!",Hero,3,0,5,,,Survival,Uncommon,,,,,Morpheus star 3+
+MorpheusRelRev_1Rare,hero,Fight Through Hel,Hero,0,4,9,,,Strength,Rare,,,,Coordinate,Morpheus
+TrinityRelRev_2Common,hero,Scorpion Kick,Hero,1,0,2,,,Strength,Common,,,,,Trinity star 1+
+TrinityRelRev_3Common,hero,She Is Going To Die,Hero,0,3,3,,,Range,Common,,,,,Trinity
+TrinityRelRev_4Uncommon,hero,You Always Told Me To Stay Off The Freeway,Hero,0,4,6,,,Range,Uncommon,,,,,Trinity claw 4+
+TrinityRelRev_1Rare,hero,You Give Me Neo Or We All Die,Hero,0,4,7,,,Tech,Rare,,,,,Trinity
+ShipCaptains_2Common,hero,Soren,Hero,0,2,3,,,Tech,Common,,,,,Ship Captains
+ShipCaptains_3Common,hero,Roland,Hero,0,2,4,,,Survival,Common,,,,,Ship Captains
+ShipCaptains_4Uncommon,hero,Ballard,Hero,0,2,5,,,Intellect,Uncommon,,,,Coordinate,Ship Captains
+ShipCaptains_1Rare,hero,Ice,Hero,0,5,8,,,Tech,Rare,,,,,Ship Captains
+NeoRevolutions_2Common,hero,It Ends Tonight,Hero,0,2,3,,,Strength,Common,,,,Digital Hero,Neo claw 2+
+NeoRevolutions_3Common,hero,I Can See You,Hero,0,2,4,,,Tech,Common,,,,,Neo
+NeoRevolutions_4Uncommon,hero,"Go Up, Over Them",Hero,0,4,6,,,Tech,Uncommon,,,,,Neo
+NeoRevolutions_1Rare,hero,"You Cannot Stop Him, But I Can",Hero,5,0,8,,,Strength,Rare,,,,,Neo
+Niobe_2Common,hero,A Hell of a Pilot,Hero,2,0,2,,,Tech,Common,,,,,Niobe
+Niobe_3Common,hero,Gotcha,Hero,0,2,4,,,Strength,Common,,,,Coordinate,Niobe heal
+Niobe_4Uncommon,hero,Infiltrate,Hero,0,4,5,,,Strength,Uncommon,,,,,Niobe
+Niobe_1Rare,hero,Some Things Change,Hero,3,3,8,,,Tech,Rare,,,,,Niobe time track
+Link_2Common,hero,Gunnery,Hero,0,2,4,,,Range,Common,,,,,Link claw 2+
+Link_3Common,hero,"Get Us Out of Here, Link",Hero,2,0,4,,,Tech,Common,,,,,Link
+Link_4Uncommon,hero,Yes!,Hero,0,2,5,,,Range,Uncommon,,,,Coordinate,Link
+Link_1Rare,hero,"Burn It, Link!",Hero,0,3,7,,,Tech,Rare,,,,Sacrifice,Link defeat machine
+DefendersOfZion_2Common,hero,Mifune,Hero,0,2,3,,,Tech,Common,,,,,Defenders of Zion
+DefendersOfZion_3Common,hero,Lock,Hero,2,0,4,,,Strength,Common,,,,,Defenders (claw 0+ scan)
+DefendersOfZion_4Uncommon,hero,Zee,Hero,3,0,6,,,Tech,Uncommon,,,,,Defenders star 3+
+DefendersOfZion_1Rare,hero,The Kid,Hero,0,5,7,,,Strength,Rare,,,,,Defenders
+PartOfTheSystem-SecurityGuard,enemy,Security Guard,Enemy,,,,1,,,,,,,Reveal,generic Human
+PartOfTheSystem-TacticalPolice,enemy,Tactical Police,Enemy,,,,2,,,,,,,Reveal,generic Human
+PartOfTheSystem-Soldier,enemy,Soldier,Enemy,,,,3,,,,,,,Strike,generic Human
+PartOfTheSystem-Bug,event,Bug,Event,,,,,,,,,,,,carte poubelle
+PartOfTheSystem-TheDesertOfTheReal,event,The Desert of the Real,Event,,,,,,,,,,,,
+PartOfTheSystem-TheMatrixIsAllAroundUs,event,The Matrix Is All Around Us,Event,,,,,,,,,,,,
+PartOfTheSystem-WhatGoodIsAPhoneCallIfYoureUnableToSpeak,event,What Good Is a Phone Call...,Event,,,,,,,,,,,,
+Act1WhatIsTheMatrix_1,enemy,Police Officer,Enemy,,,,3,,,,,,,,Human
+Act1WhatIsTheMatrix_2,enemy,Agent Brown,Enemy,,,,8,,,,,,,"Chase,Strike",Agent
+Act1WhatIsTheMatrix_3,event,Bug,Event,,,,,,,,,,,,
+Act1WhatIsTheMatrix_4,event,Time Is Always Against Us,Event,,,,,,,,,,,Reveal,-time track
+Act1WhatIsTheMatrix_5,challenge,All I'm Offering Is The Truth,Challenge,,,,,,,,,,,Reveal,pay 2 claw
+Act1WhatIsTheMatrix_6,challenge,How Deep The Rabbit Hole Goes,Challenge,2,,,,,,,,,,Reveal,begins Part2
+Act1WhatIsTheMatrixExtra_1Rare,hero,The One (Neo),Hero,,,6,,,,Rare,,,,,Neo extra
+Act1WhatIsTheMatrixExtra_2Common,hero,I Know Kung Fu (Neo),Hero,,,1,,,,Common,,,,,Neo extra (1+)
+Act1WhatIsTheMatrixExtra_3Common,hero,"Guns, Lots Of Guns (Neo)",Hero,,,2,,,,Common,,,,,Neo extra (2+)
+Act1WhatIsTheMatrixExtra_4Uncommon,hero,You Move Like They Do (Neo),Hero,,,4,,,,Uncommon,,,,,Neo extra
+Act1TheOraclesCall_1,enemy,Upgrades,Enemy,,,,4,,,,,,,Fight,Program
+Act1TheOraclesCall_2,enemy,Seraph,Enemy,,,,3,,,,,,,Fight,Program
+Act1TheOraclesCall_3,challenge,Crisis Meeting,Challenge,,,,,,,,,,,Combat Zone,needs 4 hero groups
+Act1TheOraclesCall_4,challenge,Backdoor,Challenge,,,,,,,,,,,Reveal,pay star
+Act1TheOraclesCall_5,challenge,Find The Oracle,Challenge,,,,,,,,,,,Reveal,begins Part2
+Act1TheOraclesCall_6,event,The Machines Are Digging,Event,,,,,,,,,,,,defeat 5 Zion heroes
+Act1TheOraclesCall_7,event,We're Already Late,Event,,,,,,,,,,,,-3 time track
+Act1TheOraclesCallExtra_1,hero,I Love Candy (Oracle),Hero,,,1,,,,,,,,,Oracle extra
+Act1TheOraclesCallExtra_2,enemy,Smith,Enemy,,,,2,,,,,,,Fight,Agent Smith intro
+Act1ClubHel_1,enemy,The Trainman,Enemy,,,,,,,,,,,"Chase,Strike",◎ escapes
+Act1ClubHel_2,event,Sati's Family,Event,,,,,,,,,,,Reveal,
+Act1ClubHel_3,enemy,The Merovingian,Enemy,,,,,,,,,,,Strike,◎ no claw
+Act1ClubHel_4,enemy,Club Hel Guard,Enemy,,,,2,,,,,,,Reveal,Program
+Act1ClubHel_5,event,Mobil Ave,Event,,,,,,,,,,,Coordinate,
+Act1ClubHelExtra_1RAre,hero,I Have Beaten You Before (Seraph),Hero,,,7,,,,Rare,,,,,Seraph extra
+Act1ClubHelExtra_2Common,hero,The Prodigal Child Returns (Seraph),Hero,,,2,,,,Common,,,,,Seraph extra
+Act1ClubHelExtra_3Common,hero,No Weapons Allowed In The Club (Seraph),Hero,,,3,,,,Common,,,,,Seraph extra
+Act1ClubHelExtra_4Uncommon,hero,I Protect That Which Matters Most (Seraph),Hero,,,5,,,,Uncommon,,,,,Seraph extra
+Act2KnowThyself_1,event,They Cut The Hardline,Event,,,,,,,,,,,,blocks exit
+Act2KnowThyself_2,event,Deja Vu,Event,,,,,,,,,,,Reveal,
+Act2KnowThyself_3,challenge,No One's Ever Made Their First Jump,Challenge,,,,,,,,,,,Reveal,training
+Act2KnowThyself_4,enemy,Look Again,Enemy,,,,3,,,,,,,Reveal,training
+Act2KnowThyself_5,enemy,Looking At The Woman In The Red Dress?,Enemy,,,,3,,,,,,,,training
+Act2KnowThyself_6,enemy,"Hit Me, If You Can.",Enemy,,,,2,,,,,,,Fight,training ◎
+Act2KnowThyself_7,enemy,You're Faster Than This,Enemy,,,,3,,,,,,,Fight,training ◎
+Act2KnowThyself_8,enemy,Stop Trying To Hit Me And Hit Me,Enemy,,,,4,,,,,,,Fight,training ◎
+Act2KnowThyself_9,challenge,See The Oracle,Challenge,,,,,,,,,,,Reveal,begins Part2
+Act2KnowThyselfExtra_1,enemy,S.W.A.T. Officer,Enemy,,,,5,,,,,,,,Human
+Act2KnowThyselfExtra_2,enemy,Agent Smith,Enemy,,,,,,,,,,,"Stationary,Cover",◎ boss leaves Act3
+Act2KnowThyselfExtra_3,other,A Glitch In The Matrix,Other,,,,,,,,,,,Special,setup
+Act2KnowThyselfExtra_4,hero,You've Got The Gift (Oracle),Hero,,,1,,,,,,,,,Oracle extra
+Act2KnowThyselfExtra_5,hero,I Can See Why She Likes You (Oracle),Hero,2,,1,,,,,,,,Coordinate,Oracle extra
+Act2KnowThyselfExtra_6,hero,Take A Cookie (Oracle),Hero,,,1,,,,,,,,,Oracle heal
+Act2KnowThyselfExtra_7,hero,I'd Better Have A Look At You (Oracle),Hero,,,1,,,,,,,,,Oracle extra
+Act2KnowThyselfExtra_8,hero,Don't Worry About The Vase (Oracle),Hero,,,1,,,,,,,,,Oracle extra
+Act2FreeTheKeymaker_1,challenge,Persephone's Kiss,Challenge,,,,,,,,,,,Reveal,begins Part2
+Act2FreeTheKeymaker_2,enemy,The Merovingian,Enemy,,,,,,,,,,,"Stationary,Cover",◎ boss defeat after 5 henchmen
+Act2FreeTheKeymaker_3,enemy,Merovingian's Henchman,Enemy,,,,5,,,,,,,Wild Swing,
+Act2FreeTheKeymaker_4,enemy,Twin,Enemy,,,,4,,,,,,,"Undefeatable,Evade",
+Act2FreeTheKeymaker_5,event,Stranded,Event,,,,,,,,,,,,
+Act2FreeTheKeymaker_6,event,Cause and Effect,Event,,,,,,,,,,,Reveal,
+Act2FreeTheKeymakerExtra_1Rare,hero,It Is My Purpose (Keymaker),Hero,0,3,7,,,,Rare,,,,Digital Hero,Keymaker
+Act2FreeTheKeymakerExtra_2Common,hero,You Are Handy (Keymaker),Hero,0,1,1,,,,Common,,,,Coordinate,Keymaker
+Act2FreeTheKeymakerExtra_3Common,hero,I'm The Keymaker,Hero,0,1,3,,,,Common,,,,Coordinate,Keymaker
+Act2FreeTheKeymakerExtra_4Uncommon,hero,Always Another Way (Keymaker),Hero,0,2,5,,,,Uncommon,,,,Coordinate,Keymaker
+Act2TheBattleOfZion_1,enemy,Sentinel Swarm,Enemy,,,,4,,,,,,,"Reveal,Stationary",Machine
+Act2TheBattleOfZion_2,enemy,Sentinel Hunter,Enemy,,,,5,,,,,,,Reveal,Machine
+Act2TheBattleOfZion_3,enemy,Digger,Enemy,,,,8,,,,,,,"Reveal,Undefeatable",◎ Machine
+Act2TheBattleOfZion_4,challenge,Fly The Mechanical Line,Challenge,,,,,,,,,,,Reveal,
+Act2TheBattleOfZion_5,event,Overwhelming Numbers,Event,,,,,,,,,,,,adds face-down
+Act3HeIsTheOne_1,enemy,Military Guard,Enemy,,,,6,,,,,,,Cover,Human
+Act3HeIsTheOne_2,enemy,Agent Jones,Enemy,,,,8,,,,,,,"Fight,Strike",Agent
+Act3HeIsTheOne_3,enemy,Agent Brown,Enemy,,,,8,,,,,,,"Fight,Strike",Agent
+Act3HeIsTheOne_4,event,Breaking Into Your Mind,Event,,,,,,,,,,,Reveal,
+Act3HeIsTheOne_5,event,Humans Are a Disease...,Event,,,,,,,,,,,,
+Act3HeIsTheOne_6,enemy,Cypher,Enemy,,,,5,,,,,,,Reveal,Human doesn't strike
+Act3HeIsTheOne_7A,event,It Is the Sound of Inevitability,Event,,,,,,,,,,,Inevitable,
+Act3HeIsTheOne_7B,event,It Is the Sound of Inevitability,Event,,,,,,,,,,,Inevitable,back side
+Act3HeIsTheOneExtra_1,hero,Now Get Up (Neo),Hero,5,5,1,,,,,,,,,Neo extra big
+Act3HeIsTheOneExtra_2,challenge,Rescue the Captive,Challenge,,,,,,,,,,,,begins Part2
+Act3HeIsTheOneExtra_3,enemy,Sentinel Destroyer,Enemy,,,,,,,,,,,,◎ Machine doesn't strike
+Act3HeIsTheOneExtra_4,enemy,Captive's Guard,Enemy,,,,7,,,,,,,,Human doesn't strike
+Act3HeIsTheOneExtra_5,event,He's Gone,Event,,,,,,,,,,,,revive
+Act3HeIsTheOneExtra_6,enemy,Agent Smith,Enemy,,,,,,,,,,,"Chase,Double Strike,Evade",◎ Evade 10 BOSS
+Act3HeIsTheOneExtra_7,enemy,Agent Brown,Enemy,,,,,,,,,,,"Chase,Double Strike,Evade",◎ Evade 6
+Act3HeIsTheOneExtra_8,enemy,Agent Jones,Enemy,,,,,,,,,,,"Chase,Double Strike,Evade",◎ Evade 8
+Act3HeIsTheOneExtra_9,enemy,Agent Smith,Enemy,,,,12,,,,,,,"Double Strike,Undefeatable",BOSS 12 PV final Matrix
+Act3HeIsTheOneExtra_10A,event,Become the One,Event,,,,,,,,,,,,Neo time track
+Act3HeIsTheOneExtra_10B,event,Become the One,Event,,,,,,,,,,,,Major Victory
+Act3TheSource_1,enemy,Agent,Enemy,,,,10,,,,,,,Double Strike,Buy Time 5
+Act3TheSource_2,enemy,Smith,Enemy,,,,1,,,,,,,,+1 per defeated Smith
+Act3TheSource_3,challenge,Destroy the Power Station,Challenge,,,,,,,,,,,Reveal,pay 4 claw
+Act3TheSource_4,challenge,Open the Door,Challenge,,,,,,,,,,,Reveal,begins Part2
+Act3TheSource_5,challenge,Deactivate the Emergency System,Challenge,,,,,,,,,,,Reveal,pay 4 claw
+Act3TheSource_6A,event,The Prophecy of the One,Event,,,,,,,,,,,Inevitable,
+Act3TheSource_6B,enemy,Tow Bomb Sentinels,Enemy,,,,20,,,,,,,Strike,BOSS 20 PV Machine
+Act3TheSourceExtra_1,challenge,Meet the Architect,Challenge,,,,,,,,,,,Inevitable,begins Part3
+Act3EverythingThatHasABeginning_1,enemy,Mobile Bomb,Enemy,,,,6,,,,,,,"Reveal,Strike",Machine explodes
+Act3EverythingThatHasABeginning_2,enemy,Smith,Enemy,,,,,,,,,,,"Undefeatable,Stationary",◎ BOSS Program
+Act3EverythingThatHasABeginning_3,enemy,Bane,Enemy,,,,7,,,,,,,"Reveal,Strike",Human boss
+Act3EverythingThatHasABeginning_4,challenge,Make an Offer to Deus Ex Machina,Challenge,,,,,,,,,,,Reveal,defeat all but Smith
+Act3EverythingThatHasABeginning_5,event,The Unscorched Sky,Event,,,,,,,,,,,Reveal,
+Act3EverythingThatHasABeginning_6A,event,The Destruction of Zion,Event,,,,,,,,,,,Inevitable,
+Act3EverythingThatHasABeginning_6B,enemy,Oracle-Smith,Enemy,,,,15,,,,,,,"Double Strike,Fight",BOSS 15 PV
+TheMatrixAct1Part1,actboard,He Is the One — Act1 Part1,ActBoard,,,,,,,,,,,,objectif (texte) non-OCR
+TheMatrixAct1Part2,actboard,Act1 Part2,ActBoard,,,,,,,,,,,,objectif (texte)
+TheMatrixAct2Part1,actboard,Act2 Part1,ActBoard,,,,,,,,,,,,objectif (texte)
+TheMatrixAct2Part2,actboard,Act2 Part2,ActBoard,,,,,,,,,,,,objectif (texte)
+TheMatrixAct3Part1,actboard,He Is the One Part1,ActBoard,,,,,,,,,,,,rescue captive
+TheMatrixAct3Part2,actboard,He Is the One Part2,ActBoard,,,,12,,,,,,,,defeat Agent Smith (12)
+TheMatrixAct3Part3A,actboard,He Is the One Part3,ActBoard,,,,,,,,,,,Evade,Agent extras
+TheMatrixAct3Part3B,actboard,He Is the One Part3 (back),ActBoard,,,,,,,,,,,,Matrix player becomes The One
+ReloadedAct1Part1,actboard,The Oracle's Call P1,ActBoard,,,,,,,,,,,,objectif (texte)
+ReloadedAct1Part2,actboard,The Oracle's Call P2,ActBoard,,,,,,,,,,,,objectif (texte)
+ReloadedAct2Part1,actboard,Free the Keymaker P1,ActBoard,,,,,,,,,,,,objectif (texte)
+ReloadedAct2Part2,actboard,Free the Keymaker P2,ActBoard,,,,,,,,,,,,objectif (texte)
+ReloadedAct3Part1,actboard,The Source P1,ActBoard,,,,,,,,,,,,objectif (texte)
+ReloadedAct3Part2,actboard,The Source P2,ActBoard,,,,,,,,,,,Inevitable,objectif (texte)
+ReloadedAct3Part3A,actboard,The Source P3,ActBoard,,,,,,,,,,,Inevitable,defeat Tow Bomb Sentinels
+ReloadedAct3Part3B,actboard,The Source P3 (back),ActBoard,,,,,,,,,,,,Major Victory
+RevolutionsAct1Part1,actboard,Club Hel P1,ActBoard,,,,,,,,,,,,objectif (texte)
+RevolutionsAct1Part2,actboard,Club Hel P2,ActBoard,,,,,,,,,,,,objectif (texte)
+RevolutionsAct2Part1,actboard,The Battle of Zion P1,ActBoard,,,,,,,,,,,,objectif (texte)
+RevolutionsAct2Part2,actboard,The Battle of Zion P2,ActBoard,,,,,,,,,,,,objectif (texte)
+RevolutionsAct3Part1,actboard,Everything That Has a Beginning P1,ActBoard,,,,,,,,,,,,offer to Deus Ex Machina
+RevolutionsAct3Part2,actboard,Everything... P2,ActBoard,,,,,,,,,,,,defeat Oracle-Smith
+RevolutionsAct3Part3A,actboard,Everything... P3,ActBoard,,,,,,,,,,,,defeat all Smiths
+RevolutionsAct3Part3B,actboard,Everything... P3 (back),ActBoard,,,,,,,,,,,,Major Victory
+Secrets-AssimilatedSmith,traitor,Assimilated Smith,Other,,,,12,,,,,,,Reveal,traitor 12 HP
+Secrets-IChooseTheMatrix,traitor,I Choose the Matrix,Other,,,0,,,,,,,,,,traitor
+Secrets-SecretsRevealed,traitor,Secrets Revealed,Other,,,,,,,,,,,Reveal,traitor
+Secrets-MorpheusSetUsFree,traitor,Morpheus Set Us Free,Other,,,0,,,,,,,,,,not traitor
+Secrets-TheMatrixIsntReal,traitor,The Matrix Isn't Real,Other,,,0,,,,,,,,,,not traitor
+Secrets-YoureGonnaBurn,traitor,You're Gonna Burn!,Other,,,0,,,,,,,,,,not traitor
+Secrets-YoureOutYouCantGoBack,traitor,You're Out You Can't Go Back,Other,,,0,,,,,,,,,,not traitor
