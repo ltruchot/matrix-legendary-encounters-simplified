@@ -7,7 +7,10 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "play": "echo '▶ Ouvre http://localhost:8137/prototype/' && python3 -m http.server 8137",
+    "sim": "node prototype/sim.js final",
+    "e2e": "node tests/e2e.js",
+    "test": "node prototype/sim.js final"
   },
   "repository": {
     "type": "git",
