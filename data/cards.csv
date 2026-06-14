@@ -127,7 +127,7 @@ Act2KnowThyselfExtra_1,enemy,S.W.A.T. Officer,Enemy,,,,5,,,,,,,,Human
 Act2KnowThyselfExtra_2,enemy,Agent Smith,Enemy,,,,,,,,,,,"Stationary,Cover",◎ boss leaves Act3
 Act2KnowThyselfExtra_3,other,A Glitch In The Matrix,Other,,,,,,,,,,,Special,setup
 Act2KnowThyselfExtra_4,hero,You've Got The Gift (Oracle),Hero,,,1,,,,,,,,,Oracle extra
-Act2KnowThyselfExtra_5,hero,I Can See Why She Likes You (Oracle),Hero,2,,1,,,,,,,,Coordinate,Oracle extra
+Act2KnowThyselfExtra_5,hero,I Can See Why She Likes You (Oracle),Hero,2,2,1,,,,,,,,Coordinate,Oracle extra (vérifié œil: ★2+griffure2/c1)
 Act2KnowThyselfExtra_6,hero,Take A Cookie (Oracle),Hero,,,1,,,,,,,,,Oracle heal
 Act2KnowThyselfExtra_7,hero,I'd Better Have A Look At You (Oracle),Hero,,,1,,,,,,,,,Oracle extra
 Act2KnowThyselfExtra_8,hero,Don't Worry About The Vase (Oracle),Hero,,,1,,,,,,,,,Oracle extra

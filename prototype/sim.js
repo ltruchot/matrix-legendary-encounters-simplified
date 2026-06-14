@@ -16,7 +16,8 @@ const MARKET_POOL=[
  {star:0,claw:4,cost:6,n:1}, // It's a Trap (Tank)
  {star:0,claw:1,cost:2,n:2}, // NEO — I Know Kung Fu
  {star:0,claw:2,cost:4,n:2}, // NEO — Guns, Lots of Guns
- {star:0,claw:4,cost:5,n:2}];// NEO — You Move Like They Do
+ {star:0,claw:4,cost:5,n:2}, // NEO — You Move Like They Do
+ {star:2,claw:2,cost:1,n:1}];// ORACLE — I Can See Why She Likes You (clin d'œil, 1 seul ex.)
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
 
 const rnd=()=>Math.random();
@@ -32,7 +33,7 @@ function play(P){
   const STRAT=P.strat||'balanced';
   const starter=[];for(let i=0;i<P.unplug;i++)starter.push({star:1,claw:0});for(let i=0;i<P.spoon;i++)starter.push({star:0,claw:1});
   const players=[];for(let i=0;i<P.np;i++)players.push({deck:shuffle(starter.map(c=>({...c}))),discard:[],hand:[]});
-  let market=[],mdeck=shuffle(expand(MARKET_POOL));
+  let market=[],mdeck=shuffle(expand(P.market||MARKET_POOL));
   for(let i=0;i<4&&mdeck.length;i++)market.push(mdeck.pop());
   let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
   const btMax=P.btMax??99;
@@ -57,9 +58,8 @@ function play(P){
       // 'balanced' : si le temps est bas, on en achète un peu ; sinon on recrute la meilleure griffure
       if(STRAT==='balanced' && t<=3 && star>=btCost && btUses<btMax){ star-=btCost; t++; btUses++; }
       let pool=market.filter(c=>c.cost<=star);
-      if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0);
-      if(STRAT==='star')pool=pool.filter(c=>c.star>0);
-      pool.sort((a,b)=>b.cost-a.cost);
+      if(P.valueBuy){ pool.sort((a,b)=>(b.star+b.claw)-(a.star+a.claw)||a.cost-b.cost); } // achat "meilleur rapport"
+      else { if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0); if(STRAT==='star')pool=pool.filter(c=>c.star>0); pool.sort((a,b)=>b.cost-a.cost); }
       if(pool[0]){const c=pool[0];star-=c.cost;dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
     }
     if(!P.perRound || cur===P.np-1) t-=Math.max(0,enemies.length-P.grace);
@@ -94,6 +94,22 @@ if(process.argv[2]==="final"){
     for(const time of times){const r=rate({np:2,bossHp:boss,time,hand:HAND,unplug:U,spoon:S,cap:CAP,grace:GR},2500);
       process.stdout.write(`${r.wr.toFixed(0).padStart(4)}%(${r.at.toFixed(1)})`.padStart(11));}
     console.log();
+  }
+}else if(process.argv[2]==="oracle"){
+  // Impact d'ajouter "I Can See Why She Likes You" (Oracle) = ★2+griffure2 pour coût 1.
+  // Bot "meilleur rapport" (valueBuy) = il SAISIT la carte cheatée (pire cas réaliste).
+  const oracle=[...MARKET_POOL,{star:2,claw:2,cost:1,n:+(process.argv[3]||1)}];
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:true,btCost:3,btMax:3,valueBuy:true,strat:'balanced'};
+  console.log(`IMPACT ORACLE (×${+(process.argv[3]||1)}) — bot 'meilleur rapport'. vict% SANS -> AVEC`);
+  console.log("config            | 1j         | 2j         | 3j");
+  for(const c of [{l:"🟡 Normal (12,t10)",b:12,t:10},{l:"🔴 Difficile (12,t8)",b:12,t:8}]){
+    let line=c.l.padEnd(18)+"|";
+    for(const np of[1,2,3]){
+      const wo=rate({...base,np,bossHp:c.b,time:c.t},runs);
+      const w =rate({...base,np,bossHp:c.b,time:c.t,market:oracle},runs);
+      line+=` ${wo.wr.toFixed(0).padStart(3)}->${w.wr.toFixed(0).padStart(3)}% |`;
+    }
+    console.log(line);
   }
 }else if(process.argv[2]==="tune"){
   // Calibrage des NOUVELLES règles : achat sur le dessus (buyToTop), ★->temps (Buy Time), starter réduit.
