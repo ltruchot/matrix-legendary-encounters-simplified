@@ -32,8 +32,12 @@
   .card:hover{transform:translateY(-4px)}
   .card img{width:100%;display:block}
   .card.dis{filter:grayscale(.7) brightness(.5);cursor:not-allowed}
-  .card.played{opacity:.92;filter:saturate(.75);border-color:var(--green);box-shadow:0 0 0 3px var(--green),0 0 16px rgba(25,255,122,.7)}
-  .card.played::after{content:"✓ jouée";position:absolute;z-index:2;top:8px;left:50%;transform:translate(-50%,0) rotate(-8deg);background:rgba(25,255,122,.97);color:#042;font-weight:800;font-size:13px;letter-spacing:.5px;padding:3px 9px;border-radius:6px;box-shadow:0 1px 6px #000;pointer-events:none}
+  /* carte JOUÉE, 2 états : "prise" (vert, encore annulable) puis "engagée" (orange, ressources dépensées) */
+  .card.stamp::after{position:absolute;z-index:2;top:8px;left:50%;transform:translate(-50%,0) rotate(-8deg);font-weight:800;font-size:13px;letter-spacing:.5px;padding:3px 9px;border-radius:6px;box-shadow:0 1px 6px #000;pointer-events:none}
+  .card.taken{opacity:.97;border-color:var(--green);box-shadow:0 0 0 3px var(--green),0 0 14px rgba(25,255,122,.6)}
+  .card.taken::after{content:"✓ prise";background:rgba(25,255,122,.97);color:#042}
+  .card.committed{opacity:.97;border-color:#ff9f43;box-shadow:0 0 0 3px #ff9f43,0 0 14px rgba(255,159,67,.6)}
+  .card.committed::after{content:"🔒 jouée";background:#ff9f43;color:#3a1f00}
   .chip.bump{animation:bump .35s}@keyframes bump{0%{transform:scale(1.35);box-shadow:0 0 14px var(--green)}100%{}}
   .card.buyable{box-shadow:0 0 0 2px var(--gold),0 0 14px var(--gold)}
   .card.legue{box-shadow:0 0 0 3px var(--blue),0 0 14px var(--blue)}
@@ -125,7 +129,7 @@
     <div class="row-title">Marché <small>— clique pour recruter (★). La carte va dans ta <b>défausse</b> (rejouée quand ton deck se recycle). <b style="color:#c08bff">Les cartes de ton héros (liseré violet) coûtent −1★.</b></small></div>
     <div class="cards" id="market"></div>
 
-    <div class="row-title">Ta main <small>— clique pour <b>jouer</b> une carte (elle se marque <b style="color:var(--green)">✓ jouée</b> et son ★/griffure rejoint ton pool). Re-clic = la <b>reprendre</b>.</small></div>
+    <div class="row-title">Ta main <small>— clique pour jouer : <b style="color:var(--green)">✓ prise</b> (annulable, re-clic = reprendre) → <b style="color:#ff9f43">🔒 jouée</b> (orange = dépensée pour un achat/une attaque, plus annulable).</small></div>
     <div class="cards" id="hand"></div>
     <div id="log"></div>
   </div>
@@ -293,8 +297,11 @@ function render(){ if(!G)return; recalc(); // le pool affiché est TOUJOURS reca
     const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<cost ? '<div class="need">manque '+(cost-G.star)+'★</div>' : '');
     return `<div class="card market ${mine?'hero':''} ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',cost)}${mine?'<div class="b-disc">héros −1</div>':''}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
   $("hand").innerHTML=p.hand.map((c,i)=>{const pl=c.played;
-    const tag = G.legueMode ? (pl?'(jouée)':'léguer ↑') : (pl?'↩︎ reprendre':c.name);
-    return `<div class="card ${G.over?'dis':''} ${pl?'played':''} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
+    // "prise" = jouée mais encore annulable ; "engagée" = ses ressources sont déjà dépensées (la reprendre passerait sous 0).
+    const locked = pl && (G.star<c.star || G.claw<c.claw);
+    const st = !pl ? '' : (locked ? 'stamp committed' : 'stamp taken');
+    const tag = G.legueMode ? (pl?(locked?'🔒 engagée':'✓ prise'):'léguer ↑') : (pl?(locked?'🔒 dépensée':'↩︎ reprendre'):c.name);
+    return `<div class="card ${G.over?'dis':''} ${st} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
   $("buyTime").disabled=G.over||G.btUses>=BT_MAX||G.star<BT_COST; $("buyTime").textContent=`⏳ Gagner du temps (3★) · ${BT_MAX-G.btUses} restant`;
   $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
