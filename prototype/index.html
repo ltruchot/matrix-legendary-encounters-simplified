@@ -210,7 +210,7 @@ const ecost=(c,hero)=> c.h===hero ? Math.max(1,c.cost-1) : c.cost; // tes cartes
 function newGame(){
   const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.hp;
   const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
-  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
+  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
   G={players,cur:0,time:d.time,bossHp,bossMax:bossHp,star:0,claw:0,btUses:0,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:shuffle(expand(ENEMY_POOL)),enemies:[],
      over:false,legueMode:false,legueDone:false};
@@ -224,32 +224,35 @@ function startTurn(){
   const p=G.players[G.cur];
   while(p.hand.length<HAND){ if(!p.deck.length){ if(!p.discard.length)break; p.deck=shuffle(p.discard); p.discard=[]; } p.hand.push(p.deck.pop()); }
   if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
-  G.star=0; G.claw=0; p.played=[]; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
+  p.hand.forEach(c=>c.played=false); // début de tour : tout est "à jouer" (drapeau par carte → position stable)
+  G.star=0; G.claw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
   if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
   turnSnap=JSON.stringify(G); // photo du début de tour (pour "Recommencer le tour")
   render();
 }
 function playCard(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over)return;
   if(G.legueMode){ return bequeath(i); }
-  G.star+=c.star; G.claw+=c.claw; p.played.push(c); p.hand.splice(i,1); render(); }
-function unplay(i){ const p=G.players[G.cur]; const c=p.played[i]; if(!c||G.over)return;
+  if(c.played){ return unplay(i); } // re-clic d'une carte déjà jouée = la reprendre (elle ne bouge pas de place)
+  G.star+=c.star; G.claw+=c.claw; c.played=true; render(); }
+function unplay(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over||!c.played)return;
   if(G.star-c.star<0||G.claw-c.claw<0)return flash("Ressources déjà dépensées — reprends d'abord un achat/une frappe, ou clique « Recommencer le tour ».");
-  G.star-=c.star; G.claw-=c.claw; p.played.splice(i,1); p.hand.push(c); log(`↩︎ Carte reprise en main.`); render(); }
+  G.star-=c.star; G.claw-=c.claw; c.played=false; log(`↩︎ Carte reprise en main.`); render(); }
 function resetTurn(){ if(!turnSnap||G.over)return; G=JSON.parse(turnSnap); log("↩︎ Tour recommencé."); render(); }
 function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legueDone)return;
+  if(c.played) return flash("Reprends d'abord cette carte (clique dessus) avant de la léguer.");
   p.hand.splice(i,1); const tgt= G.players.length>1 ? (G.cur+1)%G.players.length : G.cur;
   (G.players[tgt].gift=G.players[tgt].gift||[]).push(c); G.legueDone=true; G.legueMode=false;
   log(G.players.length>1 ? `🎁 Tu lègues <b>${c.name}</b> au joueur ${tgt+1} (il l'aura en main, jouable, à son tour).` : `🎁 Tu gardes <b>${c.name}</b> en main pour ton prochain tour (tu joueras 6 cartes).`);
   render(); }
 function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.claw-=d; G.bossHp-=d; log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
 function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
-function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.star-=cost; G.boughtThisTurn=true; p.discard.push({...c}); G.market.splice(i,1); if(G.marketDeck.length)G.market.push(G.marketDeck.pop()); log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
+function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.star-=cost; G.boughtThisTurn=true; p.discard.push({...c}); if(G.marketDeck.length){G.market[i]=G.marketDeck.pop();}else{G.market.splice(i,1);} log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
 function buyTime(){ if(G.over)return; if(G.btUses>=BT_MAX)return flash(`Plus de 'gagner du temps' (max ${BT_MAX}).`); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★.`); G.star-=BT_COST; G.time++; G.btUses++; log(`⏳ +1 temps (−${BT_COST}★). Reste ${BT_MAX-G.btUses} usage(s).`); flashTime(); render(); }
 function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
 function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const surv=G.enemies.length;
   if(surv){ G.time-=surv; log(`Fin du tour : ${surv} agent(s) en vie → <b>⏳ −${surv}</b> (reste ${G.time}).`); flashTime(); }
   if(G.time<=0)return end(false);
-  p.discard.push(...p.played,...p.hand); p.played=[]; p.hand=[];
+  p.hand.forEach(c=>delete c.played); p.discard.push(...p.hand); p.hand=[];
   G.cur=(G.cur+1)%G.players.length; startTurn(); }
 function end(win){ G.over=true; render(); $("overlay").className="overlay show "+(win?"win":"lose"); $("ovTitle").textContent=win?"VICTOIRE 🟢":"DÉFAITE 💀"; $("ovText").textContent=win?"Vous avez libéré la Matrice !":"Le temps est écoulé — les machines gagnent."; }
 
@@ -265,8 +268,9 @@ function render(){ if(!G)return;
   $("market").innerHTML=G.market.map((c,i)=>{const cost=ecost(c,p.hero), mine=c.h===p.hero, ok=G.star>=cost&&!G.over&&!G.boughtThisTurn;
     const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<cost ? '<div class="need">manque '+(cost-G.star)+'★</div>' : '');
     return `<div class="card market ${mine?'hero':''} ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',cost)}${mine?'<div class="b-disc">héros −1</div>':''}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
-  $("hand").innerHTML=p.hand.map((c,i)=>`<div class="card ${G.over?'dis':''} ${G.legueMode?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${G.legueMode?'léguer ↑':c.name}</div></div>`).join("")
-    + p.played.map((c,i)=>`<div class="card played" onclick="unplay(${i})" title="reprendre">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">↩︎ reprendre</div></div>`).join("");
+  $("hand").innerHTML=p.hand.map((c,i)=>{const pl=c.played;
+    const tag = G.legueMode ? (pl?'(jouée)':'léguer ↑') : (pl?'↩︎ reprendre':c.name);
+    return `<div class="card ${G.over?'dis':''} ${pl?'played':''} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
   $("buyTime").disabled=G.over||G.btUses>=BT_MAX||G.star<BT_COST; $("buyTime").textContent=`⏳ Gagner du temps (3★) · ${BT_MAX-G.btUses} restant`;
   $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
