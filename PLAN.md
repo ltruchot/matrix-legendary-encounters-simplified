@@ -9,14 +9,16 @@
 prototype web fonctionnel + testé e2e (Playwright, 0 erreur JS, gagnable à toutes difficultés),
 équilibrage validé par simulation (5000 parties/config).
 
-**v3 (1-3 joueurs)** ajoute, en gardant l'équilibre :
+**v3-v4 (1-3 joueurs)** ajoute, en gardant l'équilibre :
 - **Avatars** : chaque joueur incarne un héros ; ses 3 cartes au marché coûtent −1★. Marché refondu
   en **5 héros × 3 cartes** (15), toutes coût ≥2, **icônes vérifiées à l'œil** sur les images.
-- **Achat → défausse** (au lieu de « sur le dessus du deck »).
-- **Légue** rendu utile : la carte arrive en **main jouable** chez le destinataire (il joue 6).
+- **Achat → défausse** ; **légue** utile (carte en main jouable chez le destinataire) ; cartes qui restent en place.
+- **v4 — Agents qui drainent leur griffure** (plafond 3, cartes blanches + warm-up) : « qui frapper quand »
+  devient une vraie décision situationnelle, **zéro malchance** (aucune partie « sans espoir »).
 
-Équilibrage v3 (`node prototype/sim.js final`) : Facile 99 %, Normal 92-94 %, Difficile 59-76 % ;
-voies préservées (rush 4-5 %/63 %, éco 81-98 % → **éco indispensable en difficile**).
+Équilibrage v4 (`node prototype/sim.js final`, 8000 parties) :
+Facile hasard 99-100 % ; Normal hasard 68-86 % / malin 93-98 % ; Difficile hasard 27-61 % /
+malin 75-88 % / ignore-agents 27-66 % ; **sans-espoir 0-3 %**. Bien jouer ≫ jouer au hasard.
 
 ## Reste à faire
 

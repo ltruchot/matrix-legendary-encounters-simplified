@@ -44,7 +44,7 @@
 <main>
   <div class="legend">
     <span><span class="ic" style="background:var(--gold)">★</span><b>★ doré</b> = recruter (acheter)</span>
-    <span><span class="ic" style="background:#ff7a7a">╱</span><b>griffure rouge</b> = attaquer / PV d'un ennemi</span>
+    <span><span class="ic" style="background:#ff7a7a">╱</span><b>griffure rouge</b> = attaquer ; sur un agent = le tuer ET ce qu'il draine en ⏳/tour</span>
     <span><span class="ic" style="background:#fff">3</span><b>chiffre bas-droit</b> = prix</span>
     <span><span class="ic" style="background:#c08bff">🦸</span><b>ton héros</b> = ses 3 cartes te coûtent −1★</span>
     <span class="tip">⛔ Le texte des cartes ne compte pas — on joue aux icônes.</span>
@@ -89,22 +89,19 @@ const DATA=[
    {img:"NebuchadnezzarCrew_1Rare.jpg",name:"Apoc",meta:"Équipage",qty:"×1",claw:4,cost:7},
   ]},
  {title:"4 · Pile de menace — les agents (face cachée)",
-  note:"Mélange ces ennemis en une pile face cachée. Si tu n'as pas autant d'exemplaires des « Part of the System », mets ce que la boîte contient. Petits chiffres = faciles à tuer.",
+  note:"La griffure d'un agent = ce qu'il faut pour le TUER **et** ce qu'il te fait perdre en ⏳ chaque tour s'il survit (un agent à 3 = −3 !). On plafonne à 3. Ajoute des cartes BLANCHES (« aucun agent ce tour ») : ~1/3 de la pile, et mets 1-2 blanches sur le DESSUS (1ers tours sans agent = départ jouable). Plus la pile a de gros agents (3) et peu de blanches, plus c'est dur. Compo indicative Difficile : surtout des 3, quelques 1-2, 2 blanches + 1 au début.",
   cards:[
-   {img:"PartOfTheSystem-SecurityGuard.jpg",name:"Security Guard",qty:"×3",hp:1},
-   {img:"PartOfTheSystem-TacticalPolice.jpg",name:"Tactical Police",qty:"×3",hp:2},
-   {img:"PartOfTheSystem-Soldier.jpg",name:"Soldier",qty:"×2",hp:3},
-   {img:"Act1WhatIsTheMatrix_1.jpg",name:"Police Officer",qty:"×1",hp:3},
-   {img:"Act3HeIsTheOne_6.jpg",name:"Cypher",qty:"×1",hp:5},
-   {img:"Act3HeIsTheOne_1.jpg",name:"Military Guard",qty:"×1",hp:6},
-   {img:"Act3HeIsTheOne_2.jpg",name:"Agent Jones",qty:"×1",hp:8},
+   {img:"PartOfTheSystem-SecurityGuard.jpg",name:"Security Guard",meta:"tue & draine 1",qty:"petits",hp:1},
+   {img:"PartOfTheSystem-TacticalPolice.jpg",name:"Tactical Police",meta:"tue & draine 2",qty:"moyens",hp:2},
+   {img:"PartOfTheSystem-Soldier.jpg",name:"Soldier",meta:"tue & draine 3",qty:"gros",hp:3},
+   {img:"Act1WhatIsTheMatrix_1.jpg",name:"Police Officer",meta:"tue & draine 3",qty:"gros",hp:3},
   ]},
  {title:"5 · Boss — choisis selon la difficulté",
-  note:"Un seul boss par partie. Pose un marqueur de PV dessus. La difficulté = quel boss + où tu places le curseur du Time Track.",
+  note:"Un seul boss par partie. Pose un marqueur de PV dessus (curseur Time Track sur 10 dans tous les cas ; la difficulté vient surtout des PV du boss et de la pile d'agents).",
   cards:[
-   {img:"Act3TheSource_1.jpg",name:"Agent — 🟢 FACILE",meta:"Boss 10 PV · Time Track sur 10",qty:"Boss",hp:10},
-   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🟡 NORMAL",meta:"Boss 12 PV · Time Track sur 10",qty:"Boss",hp:12},
-   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🔴 DIFFICILE",meta:"Boss 12 PV · Time Track sur 8",qty:"Boss",hp:12},
+   {img:"Act3TheSource_1.jpg",name:"Agent — 🟢 FACILE",meta:"Boss 10 PV · pile douce (petits + bcp de blanches)",qty:"Boss",hp:10},
+   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🟡 NORMAL",meta:"Boss 12 PV · pile moyenne",qty:"Boss",hp:12},
+   {img:"Act3HeIsTheOneExtra_9.jpg",name:"Agent Smith — 🔴 DIFFICILE",meta:"Boss 15 PV · pile dense (bcp de 3)",qty:"Boss",hp:15},
   ]},
 ];
 const badge=(c)=>`${c.star?`<div class="badge b-star">${c.star}</div>`:''}${c.claw?`<div class="badge b-claw">${c.claw}</div>`:''}${c.cost!=null?`<div class="badge b-cost">${c.cost}</div>`:''}${c.hp!=null&&c.cost==null?`<div class="badge b-hp">${c.hp}</div>`:''}`;
