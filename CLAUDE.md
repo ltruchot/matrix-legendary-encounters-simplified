@@ -38,9 +38,15 @@ Three layers, no framework, no bundler — plain HTML/CSS/JS and static data.
 - **`data/cards.json` / `data/cards.csv`** — the full 213-card dataset OCR'd from the official card images. This is reference/source data; the prototype does **not** load it at runtime — instead it embeds a small *hand-curated, hand-verified* subset of cards as JS literals. Trust the prototype/sim literals over the raw dataset: the JSON `_meta` warns that OCR may confuse ★ (recruit) with claw (attack) and that only the starters + ~13 market cards have been manually verified.
 - **`assets/cards/*.jpg`** — the 213 card images; filenames are the join key between the dataset and the embedded card lists.
 
-### Game model (shared rules)
+### Game model (shared rules, v3)
 
-Co-op deckbuilder: each turn an agent may arrive (cap 2 on the table), the player draws a 5-card hand, plays cards to pool ★/claw, spends claw to kill agents or hit the boss and ★ to recruit one market card (lands on top of the deck) or buy time. Each agent still alive at end of turn drains the Time Track by 1; Time Track hitting 0 = loss, boss HP hitting 0 = win. Difficulty = real boss card + starting Time Track position (facile/normal/difficile).
+Co-op deckbuilder, 1–3 players (hotseat). Each turn an agent may arrive (cap 2 on the table), the player draws a 5-card hand, plays cards to pool ★/claw, spends claw to kill agents or hit the boss and ★ to recruit **one** market card per turn (→ goes to the **discard pile**) or buy time (3★ → +1 Time Track, max 3/game). Each agent still alive at end of turn drains the Time Track by 1; Time Track hitting 0 = loss, boss HP hitting 0 = win. Difficulty = real boss card + starting Time Track position (facile/normal/difficile).
+
+Two mechanics carry identity/coop flavor and are kept balance-neutral by design (verified in sim):
+- **Avatars** — each player incarnates a hero (Neo/Trinity/Morpheus/Niobe/Crew). The market is exactly **5 heroes × 3 cards** (cost ≥2); a player's own hero's cards cost **1★ less** (min 1). `HEROES`/`MARKET_POOL` carry an `h` hero tag; `ecost(card, hero)` applies the discount.
+- **Léguer (bequeath)** — give 1 card from your hand to the next player; it lands in their **hand** (playable, they play 6 that turn), at the cost of the giver playing one fewer. Solo = keep it for your next turn. Implemented via a per-player `gift[]` consumed in `startTurn`.
+
+When you change card icons/values, the source of truth is the **card image** under `assets/cards/` — verify by eye (the OCR dataset confuses ★↔claw). The current 15-card market was eye-verified; mirror any change in both `index.html` (`MARKET_POOL`) and `sim.js` (`HERO_MARKET`).
 
 ## Conventions
 
