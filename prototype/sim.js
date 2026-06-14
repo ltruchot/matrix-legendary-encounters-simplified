@@ -46,10 +46,17 @@ function play(P){
   for(let i=0;i<4&&mdeck.length;i++)market.push(mdeck.pop());
   let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
   const btMax=P.btMax??99;
+  const pending=Array(P.np).fill(null); // carte léguée en attente pour le joueur i (mode legueQ)
   const draw=(p,n)=>{while(p.hand.length<n){if(!p.deck.length){if(!p.discard.length)break;p.deck=shuffle(p.discard);p.discard=[]}p.hand.push(p.deck.pop())}};
   while(true){
     if(turns>300)return{win:false,turns};
     turns++;const p=players[cur];draw(p,P.hand);
+    // LÉGUE option 1 (transfert) : on lègue NOTRE pire carte piochée au suivant (sacrifice), PUIS on
+    // ajoute le cadeau reçu à notre main (il sera joué -> il rejoint NOTRE défausse). Pas de carte "fantôme".
+    if(P.legueQ){
+      if(p.hand.length>1){let wi=0;for(let i=1;i<p.hand.length;i++)if((p.hand[i].star+p.hand[i].claw)<(p.hand[wi].star+p.hand[wi].claw))wi=i;
+        pending[(cur+1)%P.np]=p.hand.splice(wi,1)[0];}
+      if(pending[cur]){p.hand.push(pending[cur]);pending[cur]=null;} }
     if(threat.length && enemies.length<P.cap)enemies.push(threat.pop());
     let star=p.hand.reduce((s,c)=>s+c.star,0),claw=p.hand.reduce((s,c)=>s+c.claw,0);
     // AVATAR, mode +dégât : tes cartes héros (icône qui matche ton avatar) valent +1 à l'usage.
@@ -109,6 +116,30 @@ if(process.argv[2]==="final"){
       process.stdout.write(`${r.wr.toFixed(0).padStart(4)}%(${r.at.toFixed(1)})`.padStart(11));}
     console.log();
   }
+}else if(process.argv[2]==="legue"){
+  // QUESTION : le légue actuel (transférer une carte au deck voisin) semble sans intérêt.
+  // A) Et s'il donnait un VRAI boost = main à 6 (ou 7) ? -> on lit l'effet d'une main plus grande.
+  // B) Le légue 'qualité' (chacun passe sa pire carte au suivant) apporte-t-il qqch au bot ?
+  // Config = jeu ACTUEL (starter 3U+2S, marché live avec Oracle, achat sur le dessus, cap2).
+  const base={unplug:3,spoon:2,cap:2,grace:0,buyToTop:true,btCost:3,btMax:3};
+  const cfgs=[{l:"🟡 Normal (12,t10)",b:12,t:10},{l:"🔴 Difficile (12,t8)",b:12,t:8}];
+  console.log(`LÉGUE — runs ${runs} — config actuelle. vict% ÉQUILIBRÉ (rush% / éco%)`);
+  console.log("\nA) Effet d'une MAIN PLUS GRANDE (proxy 'le légue fait un vrai boost de débit')");
+  for(const c of cfgs){ console.log(`\n${c.l}`); console.log("  J |   main 5 (actuel)    |       main 6        |       main 7");
+    for(const np of[1,2,3]){
+      const cell=h=>{const eq=rate({...base,np,bossHp:c.b,time:c.t,hand:h,strat:'balanced'},runs);
+        const ru=rate({...base,np,bossHp:c.b,time:c.t,hand:h,strat:'nobuy'},runs);
+        const ec=rate({...base,np,bossHp:c.b,time:c.t,hand:h,strat:'buytime'},runs);
+        return `${eq.wr.toFixed(0).padStart(3)}% (${ru.wr.toFixed(0)}/${ec.wr.toFixed(0)})`;};
+      console.log(`  ${np} | ${cell(5).padEnd(19)} | ${cell(6).padEnd(18)} | ${cell(7)}`);
+    } }
+  console.log("\nB) Légue 'QUALITÉ' (main 5, on passe sa pire carte au suivant) — SANS -> AVEC, équilibré");
+  for(const c of cfgs){ let line=c.l.padEnd(20)+"|";
+    for(const np of[1,2,3]){
+      const wo=rate({...base,np,bossHp:c.b,time:c.t,hand:5,strat:'balanced'},runs);
+      const w =rate({...base,np,bossHp:c.b,time:c.t,hand:5,strat:'balanced',legueQ:true},runs);
+      line+=` ${np}j ${wo.wr.toFixed(0).padStart(3)}->${w.wr.toFixed(0).padStart(3)}% |`;
+    } console.log(line); }
 }else if(process.argv[2]==="avatar"){
   // QUESTION : marché en triplets de héros (3/héros, coût>=2), achat -> DÉFAUSSE (accès différé),
   // chaque joueur a un AVATAR. On compare le BONUS : aucun | réduction(-1 coût) | +dégât(+1 icône).

@@ -138,7 +138,7 @@
   </p>
   <p><b>Ton tour :</b> un agent débarque (max 2) → joue ta main → dépense :
   griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte arrive sur ton deck) ou <b>gagner du temps</b>.
-  Puis tu peux <b>léguer 1 carte</b> au joueur suivant (solo : la garder pour ton prochain tour). Fin du tour :
+  Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour. Fin du tour :
   chaque agent encore vivant fait <b>⏳−1</b>.</p>
   <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
   En difficile, l'économie devient indispensable.</p>
@@ -186,7 +186,7 @@ const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})})
 
 function newGame(){
   const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.hp;
-  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[]});
+  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[],gift:[]});
   G={players,cur:0,time:d.time,bossHp,bossMax:bossHp,star:0,claw:0,btUses:0,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:shuffle(expand(ENEMY_POOL)),enemies:[],
      over:false,legueMode:false,legueDone:false};
@@ -199,6 +199,7 @@ function newGame(){
 function startTurn(){
   const p=G.players[G.cur];
   while(p.hand.length<HAND){ if(!p.deck.length){ if(!p.discard.length)break; p.deck=shuffle(p.discard); p.discard=[]; } p.hand.push(p.deck.pop()); }
+  if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
   G.star=0; G.claw=0; p.played=[]; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
   if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
   turnSnap=JSON.stringify(G); // photo du début de tour (pour "Recommencer le tour")
@@ -213,8 +214,8 @@ function unplay(i){ const p=G.players[G.cur]; const c=p.played[i]; if(!c||G.over
 function resetTurn(){ if(!turnSnap||G.over)return; G=JSON.parse(turnSnap); log("↩︎ Tour recommencé."); render(); }
 function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legueDone)return;
   p.hand.splice(i,1); const tgt= G.players.length>1 ? (G.cur+1)%G.players.length : G.cur;
-  G.players[tgt].deck.push(c); G.legueDone=true; G.legueMode=false;
-  log(G.players.length>1 ? `🎁 Tu lègues <b>${c.name}</b> au joueur ${tgt+1} (sur son deck).` : `🎁 Tu gardes <b>${c.name}</b> pour ton prochain tour.`);
+  (G.players[tgt].gift=G.players[tgt].gift||[]).push(c); G.legueDone=true; G.legueMode=false;
+  log(G.players.length>1 ? `🎁 Tu lègues <b>${c.name}</b> au joueur ${tgt+1} (il l'aura en main, jouable, à son tour).` : `🎁 Tu gardes <b>${c.name}</b> en main pour ton prochain tour (tu joueras 6 cartes).`);
   render(); }
 function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.claw-=d; G.bossHp-=d; log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
 function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
