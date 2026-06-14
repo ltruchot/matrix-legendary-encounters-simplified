@@ -92,10 +92,10 @@ Act1WhatIsTheMatrix_3,event,Bug,Event,,,,,,,,,,,,
 Act1WhatIsTheMatrix_4,event,Time Is Always Against Us,Event,,,,,,,,,,,Reveal,-time track
 Act1WhatIsTheMatrix_5,challenge,All I'm Offering Is The Truth,Challenge,,,,,,,,,,,Reveal,pay 2 claw
 Act1WhatIsTheMatrix_6,challenge,How Deep The Rabbit Hole Goes,Challenge,2,,,,,,,,,,Reveal,begins Part2
-Act1WhatIsTheMatrixExtra_1Rare,hero,The One (Neo),Hero,,,6,,,,Rare,,,,,Neo extra
-Act1WhatIsTheMatrixExtra_2Common,hero,I Know Kung Fu (Neo),Hero,,,1,,,,Common,,,,,Neo extra (1+)
-Act1WhatIsTheMatrixExtra_3Common,hero,"Guns, Lots Of Guns (Neo)",Hero,,,2,,,,Common,,,,,Neo extra (2+)
-Act1WhatIsTheMatrixExtra_4Uncommon,hero,You Move Like They Do (Neo),Hero,,,4,,,,Uncommon,,,,,Neo extra
+Act1WhatIsTheMatrixExtra_1Rare,hero,The One (Neo),Hero,0,6,9,,,Strength,Rare,,,,,Neo extra (vérifié œil)
+Act1WhatIsTheMatrixExtra_2Common,hero,I Know Kung Fu (Neo),Hero,0,1,2,,,Survival,Common,,,,,Neo extra (vérifié œil ; claw 1+)
+Act1WhatIsTheMatrixExtra_3Common,hero,"Guns, Lots Of Guns (Neo)",Hero,0,2,4,,,Range,Common,,,,,Neo extra (vérifié œil ; claw 2+)
+Act1WhatIsTheMatrixExtra_4Uncommon,hero,You Move Like They Do (Neo),Hero,0,4,5,,,Intellect,Uncommon,,,,,Neo extra (vérifié œil)
 Act1TheOraclesCall_1,enemy,Upgrades,Enemy,,,,4,,,,,,,Fight,Program
 Act1TheOraclesCall_2,enemy,Seraph,Enemy,,,,3,,,,,,,Fight,Program
 Act1TheOraclesCall_3,challenge,Crisis Meeting,Challenge,,,,,,,,,,,Combat Zone,needs 4 hero groups

@@ -13,7 +13,10 @@ const MARKET_POOL=[
  {star:0,claw:2,cost:4,n:2}, // Your Men Are Already Dead (Trinity) — corrigé : griffure (pas ★)
  {star:0,claw:2,cost:4,n:2}, // Combat Training (Tank)
  {star:0,claw:3,cost:5,n:2}, // You Think That's Air (Morpheus)
- {star:0,claw:4,cost:6,n:1}];// It's a Trap (Tank)
+ {star:0,claw:4,cost:6,n:1}, // It's a Trap (Tank)
+ {star:0,claw:1,cost:2,n:2}, // NEO — I Know Kung Fu
+ {star:0,claw:2,cost:4,n:2}, // NEO — Guns, Lots of Guns
+ {star:0,claw:4,cost:5,n:2}];// NEO — You Move Like They Do
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
 
 const rnd=()=>Math.random();
