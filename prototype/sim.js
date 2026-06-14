@@ -18,6 +18,15 @@ const MARKET_POOL=[
  {star:0,claw:2,cost:4,n:2}, // NEO — Guns, Lots of Guns
  {star:0,claw:4,cost:5,n:2}, // NEO — You Move Like They Do
  {star:2,claw:2,cost:1,n:1}];// ORACLE — I Can See Why She Likes You (clin d'œil, 1 seul ex.)
+// MARCHÉ "AVATARS" : exactement 3 cartes par héros, toutes coût >=2 (pour que le bonus d'avatar compte).
+// Cartes RÉELLES (data/cards.csv) — icônes à re-vérifier à l'œil sur l'image avant usage physique.
+const HERO_MARKET=[
+ {h:'neo',     star:0,claw:1,cost:2,n:1}, {h:'neo',     star:0,claw:2,cost:4,n:1}, {h:'neo',     star:0,claw:4,cost:5,n:1}, // I Know Kung Fu / Guns / You Move Like They Do
+ {h:'trinity', star:0,claw:3,cost:3,n:1}, {h:'trinity', star:0,claw:2,cost:4,n:1}, {h:'trinity', star:0,claw:4,cost:6,n:1}, // She Is Going To Die / Your Men Are Already Dead / Off The Freeway
+ {h:'morpheus',star:2,claw:0,cost:3,n:1}, {h:'morpheus',star:2,claw:0,cost:4,n:1}, {h:'morpheus',star:0,claw:3,cost:5,n:1}, // I've Spent My Life / Towering Leap / You Think That's Air
+ {h:'tank',    star:2,claw:0,cost:3,n:1}, {h:'tank',    star:0,claw:2,cost:4,n:1}, {h:'tank',    star:0,claw:4,cost:7,n:1}, // Operator / Combat Training / Apoc
+ {h:'niobe',   star:2,claw:0,cost:2,n:1}, {h:'niobe',   star:0,claw:2,cost:4,n:1}, {h:'niobe',   star:0,claw:4,cost:5,n:1}, // A Hell of a Pilot / Gotcha / Infiltrate
+ {h:'zion',    star:0,claw:2,cost:3,n:1}, {h:'zion',    star:2,claw:0,cost:4,n:1}, {h:'zion',    star:0,claw:5,cost:7,n:1}];// Mifune / Lock / The Kid
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
 
 const rnd=()=>Math.random();
@@ -32,7 +41,7 @@ const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})})
 function play(P){
   const STRAT=P.strat||'balanced';
   const starter=[];for(let i=0;i<P.unplug;i++)starter.push({star:1,claw:0});for(let i=0;i<P.spoon;i++)starter.push({star:0,claw:1});
-  const players=[];for(let i=0;i<P.np;i++)players.push({deck:shuffle(starter.map(c=>({...c}))),discard:[],hand:[]});
+  const players=[];for(let i=0;i<P.np;i++)players.push({deck:shuffle(starter.map(c=>({...c}))),discard:[],hand:[],av:P.avList?P.avList[i%P.avList.length]:null});
   let market=[],mdeck=shuffle(expand(P.market||MARKET_POOL));
   for(let i=0;i<4&&mdeck.length;i++)market.push(mdeck.pop());
   let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
@@ -43,24 +52,29 @@ function play(P){
     turns++;const p=players[cur];draw(p,P.hand);
     if(threat.length && enemies.length<P.cap)enemies.push(threat.pop());
     let star=p.hand.reduce((s,c)=>s+c.star,0),claw=p.hand.reduce((s,c)=>s+c.claw,0);
+    // AVATAR, mode +dégât : tes cartes héros (icône qui matche ton avatar) valent +1 à l'usage.
+    if(P.avMode==='damage'&&p.av)p.hand.forEach(c=>{if(c.h===p.av){if(c.claw>0)claw++;else if(c.star>0)star++;}});
     p.discard.push(...p.hand);p.hand=[];
     enemies.sort((a,b)=>a.hp-b.hp);
     enemies=enemies.filter(e=>{if(claw>=e.hp){claw-=e.hp;return false}return true});
     if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d}
     if(boss<=0)return{win:true,turns};
-    const dest=c=>P.buyToTop?p.deck.push(c):p.discard.push(c); // achat sur le dessus du deck
+    const dest=c=>P.buyToTop?p.deck.push(c):p.discard.push(c); // achat : sur le deck (buyToTop) ou en défausse
     const btCost=P.btCost||3;                                   // ★ pour +1 au Time Track (Buy Time)
+    // AVATAR, mode réduction : tes cartes héros coûtent 1 de moins (min 1). mine() = bonus pour préférer tes cartes.
+    const eco=c=>(P.avMode==='discount'&&c.h===p.av)?Math.max(1,c.cost-1):c.cost;
+    const mine=c=>(c.h&&c.h===p.av)?1:0;
+    const take=pool=>{if(!pool[0])return;const c=pool[0];star-=eco(c);dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())};
     if(STRAT==='buytime'){ // voie éco/contrôle : convertir ★ en temps (1x/tour, plafond btMax/partie)
       if(star>=btCost && t<12 && btUses<btMax){ star-=btCost; t++; btUses++; }
-      let pool=market.filter(c=>c.cost<=star && c.claw>0).sort((a,b)=>b.cost-a.cost);
-      if(pool[0]){const c=pool[0];star-=c.cost;dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
+      take(market.filter(c=>eco(c)<=star && c.claw>0).sort((a,b)=>mine(b)-mine(a)||eco(b)-eco(a)));
     }else if(STRAT!=='nobuy'){
       // 'balanced' : si le temps est bas, on en achète un peu ; sinon on recrute la meilleure griffure
       if(STRAT==='balanced' && t<=3 && star>=btCost && btUses<btMax){ star-=btCost; t++; btUses++; }
-      let pool=market.filter(c=>c.cost<=star);
-      if(P.valueBuy){ pool.sort((a,b)=>(b.star+b.claw)-(a.star+a.claw)||a.cost-b.cost); } // achat "meilleur rapport"
-      else { if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0); if(STRAT==='star')pool=pool.filter(c=>c.star>0); pool.sort((a,b)=>b.cost-a.cost); }
-      if(pool[0]){const c=pool[0];star-=c.cost;dest({...c});market.splice(market.indexOf(c),1);if(mdeck.length)market.push(mdeck.pop())}
+      let pool=market.filter(c=>eco(c)<=star);
+      if(P.valueBuy){ pool.sort((a,b)=>mine(b)-mine(a)||(b.star+b.claw)-(a.star+a.claw)||eco(a)-eco(b)); } // achat "meilleur rapport"
+      else { if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0); if(STRAT==='star')pool=pool.filter(c=>c.star>0); pool.sort((a,b)=>mine(b)-mine(a)||eco(b)-eco(a)); }
+      take(pool);
     }
     if(!P.perRound || cur===P.np-1) t-=Math.max(0,enemies.length-P.grace);
     if(t<=0)return{win:false,turns};
@@ -69,7 +83,7 @@ function play(P){
 }
 function rate(P,runs){let w=0,tw=0;for(let i=0;i<runs;i++){const r=play(P);if(r.win){w++;tw+=r.turns}}return{wr:100*w/runs,at:w?tw/w:0}}
 
-const runs=4000;
+const runs=+(process.env.RUNS||4000);
 if(process.argv[2]==="final"){
   // RÈGLES v2 : main 5, starter 3 Unplug + 2 Spoon, cap 2 agents, Time Track 10,
   // achat SUR LE DESSUS du deck, ★->temps (3★=+1, max 3/partie). Difficulté = PV du boss (10/12/14).
@@ -94,6 +108,32 @@ if(process.argv[2]==="final"){
     for(const time of times){const r=rate({np:2,bossHp:boss,time,hand:HAND,unplug:U,spoon:S,cap:CAP,grace:GR},2500);
       process.stdout.write(`${r.wr.toFixed(0).padStart(4)}%(${r.at.toFixed(1)})`.padStart(11));}
     console.log();
+  }
+}else if(process.argv[2]==="avatar"){
+  // QUESTION : marché en triplets de héros (3/héros, coût>=2), achat -> DÉFAUSSE (accès différé),
+  // chaque joueur a un AVATAR. On compare le BONUS : aucun | réduction(-1 coût) | +dégât(+1 icône).
+  // On lit aussi la DIVERSITÉ des voies (rush sans achat / éco-contrôle) pour vérifier l'équilibre.
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,btCost:3,btMax:3,buyToTop:false,market:HERO_MARKET};
+  const avList=['neo','trinity','morpheus','niobe','tank','zion'];
+  const cell=(np,b,t,avMode)=>{
+    const eq=rate({...base,np,bossHp:b,time:t,strat:'balanced',avMode,avList},runs);
+    const ru=rate({...base,np,bossHp:b,time:t,strat:'nobuy',  avMode,avList},runs);
+    const ec=rate({...base,np,bossHp:b,time:t,strat:'buytime',avMode,avList},runs);
+    return `${eq.wr.toFixed(0).padStart(3)}% (rush ${ru.wr.toFixed(0)} / éco ${ec.wr.toFixed(0)})`;
+  };
+  console.log(`AVATAR — runs ${runs} — marché 6 héros×3, achat->défausse. vict% ÉQUILIBRÉ (rush% / éco%)`);
+  for(const c of [{l:"🟡 Normal (Smith 12, t10)",b:12,t:10},{l:"🔴 Difficile (Smith 12, t8)",b:12,t:8}]){
+    console.log(`\n${c.l}`);
+    console.log("  J |        SANS bonus        |   RÉDUCTION (-1 coût)    |     +DÉGÂT (+1 icône)");
+    for(const np of[1,2,3])
+      console.log(`  ${np} | ${cell(np,c.b,c.t,null).padEnd(24)} | ${cell(np,c.b,c.t,'discount').padEnd(23)} | ${cell(np,c.b,c.t,'damage')}`);
+  }
+  // Effet seul du changement achat->défausse (sans avatar), pour isoler son impact :
+  console.log("\nISOLER achat->défausse (sans avatar, équilibré) : DESSUS du deck -> DÉFAUSSE");
+  for(const c of [{l:"🟡 Normal",b:12,t:10},{l:"🔴 Difficile",b:12,t:8}]){
+    const top=rate({...base,np:1,bossHp:c.b,time:c.t,strat:'balanced',buyToTop:true},runs);
+    const dis=rate({...base,np:1,bossHp:c.b,time:c.t,strat:'balanced',buyToTop:false},runs);
+    console.log(`  ${c.l.padEnd(12)} 1j : ${top.wr.toFixed(0)}% -> ${dis.wr.toFixed(0)}%`);
   }
 }else if(process.argv[2]==="oracle"){
   // Impact d'ajouter "I Can See Why She Likes You" (Oracle) = ★2+griffure2 pour coût 1.
