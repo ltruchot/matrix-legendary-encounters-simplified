@@ -16,9 +16,14 @@ prototype web fonctionnel + testé e2e (Playwright, 0 erreur JS, gagnable à tou
 - **v4 — Agents qui drainent leur griffure** (plafond 3, cartes blanches + warm-up) : « qui frapper quand »
   devient une vraie décision situationnelle, **zéro malchance** (aucune partie « sans espoir »).
 
-Équilibrage v4 (`node prototype/sim.js final`, 8000 parties) :
-Facile hasard 99-100 % ; Normal hasard 68-86 % / malin 93-98 % ; Difficile hasard 27-61 % /
-malin 75-88 % / ignore-agents 27-66 % ; **sans-espoir 0-3 %**. Bien jouer ≫ jouer au hasard.
+Équilibrage v4 (`node prototype/sim.js final`, 8000 parties) — un vrai enjeu à chaque niveau :
+| | malin | hasard | bourrin (0 achat, tape boss) |
+|---|---|---|---|
+| 🟢 Facile (b11) | 95-99 % | 78-90 % | **53 %** (enjeu réel) |
+| 🟡 Normal (b12) | 94-98 % | 69-86 % | 52-53 % |
+| 🔴 Difficile (b15) | 75-88 % | 26-61 % | 3-4 % |
+
+sans-espoir 0-1 % partout. Bien jouer ≫ jouer au hasard ≫ bourriner sans comprendre.
 
 ## Reste à faire
 
