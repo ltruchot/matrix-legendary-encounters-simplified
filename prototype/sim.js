@@ -44,7 +44,7 @@ function play(P){
   const players=[];for(let i=0;i<P.np;i++)players.push({deck:shuffle(starter.map(c=>({...c}))),discard:[],hand:[],av:P.avList?P.avList[i%P.avList.length]:null});
   let market=[],mdeck=shuffle(expand(P.market||MARKET_POOL));
   for(let i=0;i<4&&mdeck.length;i++)market.push(mdeck.pop());
-  let threat=shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
+  let threat=P.threatDeck?P.threatDeck.slice():shuffle(expand(ENEMY_POOL)),enemies=[],cur=0,turns=0,boss=P.bossHp,t=P.time,btUses=0;
   const btMax=P.btMax??99;
   const pending=Array(P.np).fill(null); // carte léguée en attente pour le joueur i (mode legueQ)
   const draw=(p,n)=>{while(p.hand.length<n){if(!p.deck.length){if(!p.discard.length)break;p.deck=shuffle(p.discard);p.discard=[]}p.hand.push(p.deck.pop())}};
@@ -57,7 +57,7 @@ function play(P){
       if(p.hand.length>1){let wi=0;for(let i=1;i<p.hand.length;i++)if((p.hand[i].star+p.hand[i].claw)<(p.hand[wi].star+p.hand[wi].claw))wi=i;
         pending[(cur+1)%P.np]=p.hand.splice(wi,1)[0];}
       if(pending[cur]){p.hand.push(pending[cur]);pending[cur]=null;} }
-    if(threat.length && enemies.length<P.cap)enemies.push(threat.pop());
+    if(threat.length && enemies.length<P.cap){const e=threat.pop();if(e.hp>0)enemies.push(e);} // hp:0 = carte blanche (rien ne débarque)
     let star=p.hand.reduce((s,c)=>s+c.star,0),claw=p.hand.reduce((s,c)=>s+c.claw,0);
     // AVATAR, mode +dégât : tes cartes héros (icône qui matche ton avatar) valent +1 à l'usage.
     if(P.avMode==='damage'&&p.av)p.hand.forEach(c=>{if(c.h===p.av){if(c.claw>0)claw++;else if(c.star>0)star++;}});
@@ -65,9 +65,18 @@ function play(P){
     // CIBLAGE : 'smart' (def) = tuer les petits agents (stoppe la fuite du temps) puis taper le boss ;
     // 'bossonly' = tout sur le boss (ignore les agents) ; 'random' = pile/face chaque tour.
     const bossOnly = P.targetPol==='bossonly' || (P.targetPol==='random' && rnd()<0.5);
-    if(!bossOnly){ enemies.sort((a,b)=>a.hp-b.hp);
-      enemies=enemies.filter(e=>{if(claw>=e.hp){claw-=e.hp;return false}return true}); }
-    if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d}
+    if(bossOnly){ if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d} }
+    else if(P.drainByHp){ // VARIANTE : un agent draine = ses griffures. On finit le boss si possible, sinon
+      if(claw>=boss){ claw-=boss; boss=0; }            // on survie en tuant les + GROS tant que l'horloge est menacée.
+      else { enemies.sort((a,b)=>b.hp-a.hp);
+        while(enemies.length){ const drain=enemies.reduce((s,e)=>s+e.hp,0);
+          if(t-drain>1) break;                          // assez sûr -> garder la griffure pour le boss
+          if(claw>=enemies[0].hp){ claw-=enemies.shift().hp; } else break; }
+        if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d} }
+    }
+    else { enemies.sort((a,b)=>a.hp-b.hp);
+      enemies=enemies.filter(e=>{if(claw>=e.hp){claw-=e.hp;return false}return true});
+      if(claw>0){const d=Math.min(claw,boss);boss-=d;claw-=d} }
     if(boss<=0)return{win:true,turns,boss:0};
     const dest=c=>P.buyToTop?p.deck.push(c):p.discard.push(c); // achat : sur le deck (buyToTop) ou en défausse
     const btCost=P.btCost||3;                                   // ★ pour +1 au Time Track (Buy Time)
@@ -90,7 +99,7 @@ function play(P){
       else { if(STRAT==='attack'||STRAT==='balanced')pool=pool.filter(c=>c.claw>0); if(STRAT==='star')pool=pool.filter(c=>c.star>0); pool.sort((a,b)=>mine(b)-mine(a)||eco(b)-eco(a)); }
       take(pool);
     }
-    if(!P.perRound || cur===P.np-1) t-=Math.max(0,enemies.length-P.grace);
+    if(!P.perRound || cur===P.np-1) t-= P.drainByHp ? enemies.reduce((s,e)=>s+e.hp,0) : Math.max(0,enemies.length-P.grace);
     if(t<=0)return{win:false,turns,boss};
     cur=(cur+1)%P.np;
   }
@@ -122,6 +131,42 @@ if(process.argv[2]==="final"){
     for(const time of times){const r=rate({np:2,bossHp:boss,time,hand:HAND,unplug:U,spoon:S,cap:CAP,grace:GR},2500);
       process.stdout.write(`${r.wr.toFixed(0).padStart(4)}%(${r.at.toFixed(1)})`.padStart(11));}
     console.log();
+  }
+}else if(process.argv[2]==="agents2"){
+  // VARIANTE : un agent draine le temps = SES GRIFFURES (au lieu de -1 fixe). Le tuer coûte ses griffures (inchangé).
+  // Pile avec cartes BLANCHES (hp:0, ~1/3 -> arrivée ~2/3 des tours) et GROS agents au fond (tard).
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,btCost:3,btMax:3,buyToTop:false,market:HERO_MARKET,
+              avMode:'discount',avList:AV_LIST,drainByHp:true,strat:'balanced',valueBuy:true,targetPol:'smart'};
+  const tier=arr=>shuffle(expand(arr));
+  const deck=(small,mid,big)=>[...tier(big),...tier(mid),...tier(small)]; // pop() prend la FIN -> small+blancs d'abord, gros tard
+  const POOLS={
+    facile:   ()=>deck([{hp:1,n:4},{hp:2,n:3},{hp:0,n:5}],[{hp:2,n:2},{hp:3,n:1}],[]),
+    normal:   ()=>deck([{hp:1,n:3},{hp:2,n:3},{hp:0,n:4}],[{hp:3,n:3},{hp:2,n:2}],[{hp:4,n:1},{hp:5,n:1}]),
+    difficile:()=>deck([{hp:1,n:2},{hp:2,n:3},{hp:0,n:3}],[{hp:3,n:3},{hp:4,n:2}],[{hp:5,n:1},{hp:6,n:1}]),
+  };
+  const rateD=(P,pool)=>{let w=0;for(let i=0;i<runs;i++){if(play({...P,threatDeck:pool()}).win)w++;}return 100*w/runs;};
+  console.log(`VARIANTE AGENTS (drain=griffures, blancs ~1/3, gros tard) — runs ${runs}. Grille boss×temps, solo (np1)\n`);
+  for(const [d,pool] of Object.entries(POOLS)){
+    console.log(d.toUpperCase());
+    console.log("  boss\\temps"+[8,10,12,14].map(t=>("t"+t).padStart(7)).join(""));
+    for(const boss of[6,8,10,12]){ let line="  "+String(boss).padStart(4)+"    ";
+      for(const time of[8,10,12,14]) line+=(rateD({...base,np:1,bossHp:boss,time},pool).toFixed(0)+'%').padStart(7);
+      console.log(line);
+    } console.log("");
+  }
+  const CFG={"🟢 Facile":{p:POOLS.facile,b:10,t:10},"🟡 Normal":{p:POOLS.normal,b:12,t:10},"🔴 Difficile":{p:POOLS.difficile,b:12,t:8}};
+  console.log("CIBLAGE — compte-t-il enfin ? malin (gère les gros) VS race (ignore les agents). 1j/2j/3j");
+  for(const [l,c] of Object.entries(CFG)){
+    const sm=[1,2,3].map(np=>rateD({...base,np,bossHp:c.b,time:c.t},c.p));
+    const rc=[1,2,3].map(np=>rateD({...base,np,bossHp:c.b,time:c.t,targetPol:'bossonly'},c.p));
+    console.log(`  ${l.padEnd(13)}| malin ${sm.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')}  | race ${rc.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')}`);
+  }
+  console.log("\nNATURE DES DÉFAITES (malin) — de justesse (boss<=3) vs SANS ESPOIR (boss>7) :");
+  for(const [l,c] of Object.entries(CFG)){ let line="  "+l.padEnd(13)+"|";
+    for(const np of[1,2,3]){ let close=0,blow=0,L=0;
+      for(let i=0;i<runs;i++){const r=play({...base,np,bossHp:c.b,time:c.t,threatDeck:c.p()});if(!r.win){L++;if(r.boss<=3)close++;else if(r.boss>7)blow++;}}
+      const pc=x=>L?Math.round(100*x/L):0; line+=` ${np}j just${pc(close)}%/sans-espoir${pc(blow)}% |`;
+    } console.log(line);
   }
 }else if(process.argv[2]==="review"){
   // BANC D'ESSAI : l'habileté change-t-elle la donne ? On compare 4 "cerveaux" de joueur,
