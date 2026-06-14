@@ -46,6 +46,7 @@
     <span><span class="ic" style="background:var(--gold)">★</span><b>★ doré</b> = recruter (acheter)</span>
     <span><span class="ic" style="background:#ff7a7a">╱</span><b>griffure rouge</b> = attaquer / PV d'un ennemi</span>
     <span><span class="ic" style="background:#fff">3</span><b>chiffre bas-droit</b> = prix</span>
+    <span><span class="ic" style="background:#c08bff">🦸</span><b>ton héros</b> = ses 3 cartes te coûtent −1★</span>
     <span class="tip">⛔ Le texte des cartes ne compte pas — on joue aux icônes.</span>
   </div>
   <div id="app"></div>
@@ -59,23 +60,35 @@ const DATA=[
    {img:"StarterUnplug.jpg",name:"Unplug",meta:"★1",qty:"×3 / joueur",star:1},
    {img:"StarterThereIsNoSpoon.jpg",name:"There Is No Spoon",meta:"griffure 1",qty:"×2 / joueur",claw:1},
   ]},
- {title:"2 · Marché commun (le « Dock »)",
-  note:"Mélange ces 22 cartes en une pioche, révèle-en 4 face visible. Toutes sont rentables aux icônes. Les 3 Neo = cartes « Extra » Neo (The Matrix). La carte Oracle (1 ex.) est un clin d'œil ultra-efficace. Rappel : 1 achat de carte max par tour.",
+ {title:"2 · Avatars — 1 par joueur (choisis ton héros)",
+  note:"Chaque joueur prend 1 avatar et incarne ce héros. Tant que tu l'incarnes, ses 3 cartes au marché te coûtent 1★ de moins. À 2-3 joueurs : prenez des héros différents.",
   cards:[
-   {img:"NebuchadnezzarCrew_2Common.jpg",name:"Dozer",qty:"×2",star:2,cost:2},
-   {img:"Tank_2Common.jpg",name:"Operator",qty:"×2",star:2,cost:3},
-   {img:"MorpheusTheMatrix_2Common.jpg",name:"I've Spent My Entire Life",qty:"×2",star:2,cost:3},
-   {img:"HovercraftTheNebuchadnezzar.jpg",name:"The Nebuchadnezzar (Hovercraft)",qty:"×2",star:2,cost:3},
-   {img:"TrinityTheMatrix_2Common.jpg",name:"Your Men Are Already Dead",qty:"×2",claw:2,cost:4},
-   {img:"Tank_3Common.jpg",name:"Combat Training",qty:"×2",claw:2,cost:4},
-   {img:"MorpheusTheMatrix_4Uncommon.jpg",name:"You Think That's Air",qty:"×2",claw:3,cost:5},
-   {img:"Tank_4Uncommon.jpg",name:"It's a Trap, Get Out!",qty:"×1",claw:4,cost:6},
-   {img:"Act1WhatIsTheMatrixExtra_2Common.jpg",name:"I Know Kung Fu (Neo)",qty:"×2",claw:1,cost:2},
-   {img:"Act1WhatIsTheMatrixExtra_3Common.jpg",name:"Guns, Lots of Guns (Neo)",qty:"×2",claw:2,cost:4},
-   {img:"Act1WhatIsTheMatrixExtra_4Uncommon.jpg",name:"You Move Like They Do (Neo)",qty:"×2",claw:4,cost:5},
-   {img:"Act2KnowThyselfExtra_5.jpg",name:"I Can See Why She Likes You (Oracle) — clin d'œil ★2+griffure2 pour 1 !",qty:"×1",star:2,claw:2,cost:1},
+   {img:"AvatarNeoReloaded.jpg",name:"Neo",meta:"ses 3 cartes : −1★",qty:"Avatar"},
+   {img:"AvatarTrinityMatrix.jpg",name:"Trinity",meta:"ses 3 cartes : −1★",qty:"Avatar"},
+   {img:"AvatarMorpheusMatrix.jpg",name:"Morpheus",meta:"ses 3 cartes : −1★",qty:"Avatar"},
+   {img:"AvatarNiobe.jpg",name:"Niobe",meta:"ses 3 cartes : −1★",qty:"Avatar"},
+   {img:"AvatarMouse.jpg",name:"Équipage du Nebuchadnezzar",meta:"ses 3 cartes : −1★",qty:"Avatar"},
   ]},
- {title:"3 · Pile de menace — les agents (face cachée)",
+ {title:"3 · Marché commun (le « Dock ») — 5 héros × 3 cartes",
+  note:"Mélange ces 15 cartes en une pioche, révèle-en 4. Chaque carte appartient à un héros ; ton avatar te fait −1★ sur les tiennes. Toutes rentables aux icônes, coût ≥2. La carte achetée va dans ta DÉFAUSSE. Rappel : 1 achat max par tour.",
+  cards:[
+   {img:"Act1WhatIsTheMatrixExtra_2Common.jpg",name:"I Know Kung Fu",meta:"Neo",qty:"×1",claw:1,cost:2},
+   {img:"Act1WhatIsTheMatrixExtra_3Common.jpg",name:"Guns, Lots of Guns",meta:"Neo",qty:"×1",claw:2,cost:4},
+   {img:"Act1WhatIsTheMatrixExtra_4Uncommon.jpg",name:"You Move Like They Do",meta:"Neo",qty:"×1",claw:4,cost:5},
+   {img:"TrinityRelRev_3Common.jpg",name:"She Is Going To Die",meta:"Trinity",qty:"×1",claw:3,cost:3},
+   {img:"TrinityTheMatrix_2Common.jpg",name:"Your Men Are Already Dead",meta:"Trinity",qty:"×1",claw:2,cost:4},
+   {img:"TrinityRelRev_4Uncommon.jpg",name:"...Stay Off The Freeway",meta:"Trinity",qty:"×1",claw:4,cost:6},
+   {img:"MorpheusTheMatrix_2Common.jpg",name:"I've Spent My Entire Life",meta:"Morpheus",qty:"×1",star:2,cost:3},
+   {img:"MorpheusRelRev_3Common.jpg",name:"Towering Leap",meta:"Morpheus",qty:"×1",star:2,cost:4},
+   {img:"MorpheusTheMatrix_4Uncommon.jpg",name:"You Think That's Air",meta:"Morpheus",qty:"×1",claw:3,cost:5},
+   {img:"Niobe_2Common.jpg",name:"A Hell of a Pilot",meta:"Niobe",qty:"×1",star:2,cost:2},
+   {img:"Niobe_3Common.jpg",name:"Gotcha",meta:"Niobe",qty:"×1",claw:2,cost:4},
+   {img:"Niobe_4Uncommon.jpg",name:"Infiltrate",meta:"Niobe",qty:"×1",claw:4,cost:5},
+   {img:"NebuchadnezzarCrew_2Common.jpg",name:"Dozer",meta:"Équipage",qty:"×1",star:2,cost:2},
+   {img:"NebuchadnezzarCrew_3Common.jpg",name:"Mouse",meta:"Équipage",qty:"×1",star:1,claw:1,cost:4},
+   {img:"NebuchadnezzarCrew_1Rare.jpg",name:"Apoc",meta:"Équipage",qty:"×1",claw:4,cost:7},
+  ]},
+ {title:"4 · Pile de menace — les agents (face cachée)",
   note:"Mélange ces ennemis en une pile face cachée. Si tu n'as pas autant d'exemplaires des « Part of the System », mets ce que la boîte contient. Petits chiffres = faciles à tuer.",
   cards:[
    {img:"PartOfTheSystem-SecurityGuard.jpg",name:"Security Guard",qty:"×3",hp:1},
@@ -86,7 +99,7 @@ const DATA=[
    {img:"Act3HeIsTheOne_1.jpg",name:"Military Guard",qty:"×1",hp:6},
    {img:"Act3HeIsTheOne_2.jpg",name:"Agent Jones",qty:"×1",hp:8},
   ]},
- {title:"4 · Boss — choisis selon la difficulté",
+ {title:"5 · Boss — choisis selon la difficulté",
   note:"Un seul boss par partie. Pose un marqueur de PV dessus. La difficulté = quel boss + où tu places le curseur du Time Track.",
   cards:[
    {img:"Act3TheSource_1.jpg",name:"Agent — 🟢 FACILE",meta:"Boss 10 PV · Time Track sur 10",qty:"Boss",hp:10},
@@ -104,7 +117,7 @@ document.getElementById('app').innerHTML=DATA.map(sec=>{
        <div class="cap"><b>${c.name}</b>${c.meta?`<div class="meta">${c.meta}</div>`:''}</div></div>`).join('')}</div>
   </section>`;
 }).join('')
-+ `<section><h2>5 · Plateau & marqueurs</h2><div class="note">Utilise le <b>Time Track</b> du plateau d'origine (curseur sur 10, ou 8 en difficile) + un jeton/dé pour marquer les PV du boss. C'est tout.</div></section>`;
++ `<section><h2>6 · Plateau & marqueurs</h2><div class="note">Utilise le <b>Time Track</b> du plateau d'origine (curseur sur 10, ou 8 en difficile) + un jeton/dé pour marquer les PV du boss. C'est tout.</div></section>`;
 </script>
 </body>
 </html>

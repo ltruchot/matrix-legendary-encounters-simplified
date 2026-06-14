@@ -18,15 +18,15 @@ const MARKET_POOL=[
  {star:0,claw:2,cost:4,n:2}, // NEO — Guns, Lots of Guns
  {star:0,claw:4,cost:5,n:2}, // NEO — You Move Like They Do
  {star:2,claw:2,cost:1,n:1}];// ORACLE — I Can See Why She Likes You (clin d'œil, 1 seul ex.)
-// MARCHÉ "AVATARS" : exactement 3 cartes par héros, toutes coût >=2 (pour que le bonus d'avatar compte).
-// Cartes RÉELLES (data/cards.csv) — icônes à re-vérifier à l'œil sur l'image avant usage physique.
+// MARCHÉ "AVATARS" livré : 5 héros × 3 cartes (coût >=2). Icônes VÉRIFIÉES À L'ŒIL sur les vraies images.
+// Identique à MARKET_POOL de prototype/index.html (même valeurs).
 const HERO_MARKET=[
- {h:'neo',     star:0,claw:1,cost:2,n:1}, {h:'neo',     star:0,claw:2,cost:4,n:1}, {h:'neo',     star:0,claw:4,cost:5,n:1}, // I Know Kung Fu / Guns / You Move Like They Do
- {h:'trinity', star:0,claw:3,cost:3,n:1}, {h:'trinity', star:0,claw:2,cost:4,n:1}, {h:'trinity', star:0,claw:4,cost:6,n:1}, // She Is Going To Die / Your Men Are Already Dead / Off The Freeway
- {h:'morpheus',star:2,claw:0,cost:3,n:1}, {h:'morpheus',star:2,claw:0,cost:4,n:1}, {h:'morpheus',star:0,claw:3,cost:5,n:1}, // I've Spent My Life / Towering Leap / You Think That's Air
- {h:'tank',    star:2,claw:0,cost:3,n:1}, {h:'tank',    star:0,claw:2,cost:4,n:1}, {h:'tank',    star:0,claw:4,cost:7,n:1}, // Operator / Combat Training / Apoc
+ {h:'neo',     star:0,claw:1,cost:2,n:1}, {h:'neo',     star:0,claw:2,cost:4,n:1}, {h:'neo',     star:0,claw:4,cost:5,n:1}, // I Know Kung Fu / Guns / You Move
+ {h:'trinity', star:0,claw:3,cost:3,n:1}, {h:'trinity', star:0,claw:2,cost:4,n:1}, {h:'trinity', star:0,claw:4,cost:6,n:1}, // She Is Going To Die / Your Men / Off The Freeway
+ {h:'morpheus',star:2,claw:0,cost:3,n:1}, {h:'morpheus',star:2,claw:0,cost:4,n:1}, {h:'morpheus',star:0,claw:3,cost:5,n:1}, // I've Spent / Towering Leap / You Think That's Air
  {h:'niobe',   star:2,claw:0,cost:2,n:1}, {h:'niobe',   star:0,claw:2,cost:4,n:1}, {h:'niobe',   star:0,claw:4,cost:5,n:1}, // A Hell of a Pilot / Gotcha / Infiltrate
- {h:'zion',    star:0,claw:2,cost:3,n:1}, {h:'zion',    star:2,claw:0,cost:4,n:1}, {h:'zion',    star:0,claw:5,cost:7,n:1}];// Mifune / Lock / The Kid
+ {h:'crew',    star:2,claw:0,cost:2,n:1}, {h:'crew',    star:1,claw:1,cost:4,n:1}, {h:'crew',    star:0,claw:4,cost:7,n:1}];// Dozer / Mouse / Apoc
+const AV_LIST=['neo','trinity','morpheus','niobe','crew'];
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
 
 const rnd=()=>Math.random();
@@ -92,11 +92,11 @@ function rate(P,runs){let w=0,tw=0;for(let i=0;i<runs;i++){const r=play(P);if(r.
 
 const runs=+(process.env.RUNS||4000);
 if(process.argv[2]==="final"){
-  // RÈGLES v2 : main 5, starter 3 Unplug + 2 Spoon, cap 2 agents, Time Track 10,
-  // achat SUR LE DESSUS du deck, ★->temps (3★=+1, max 3/partie). Difficulté = PV du boss (10/12/14).
-  const base={time:10,hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:true,btCost:3,btMax:3};
+  // RÈGLES v3 (livrées) : main 5, starter 3 Unplug + 2 Spoon, cap 2 agents, Time Track 10,
+  // marché 5 héros×3, achat -> DÉFAUSSE, AVATAR (tes cartes héros -1★), ★->temps (3★=+1, max 3/partie).
+  const base={time:10,hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btCost:3,btMax:3,market:HERO_MARKET,avMode:'discount',avList:AV_LIST};
   const cfgs=[{label:"🟢 Facile (Agent 10, t10)",bossHp:10,time:10},{label:"🟡 Normal (Smith 12, t10)",bossHp:12,time:10},{label:"🔴 Difficile (Smith 12, t8)",bossHp:12,time:8}];
-  console.log("FINAL v2 — starter 3U+2S, achat sur le dessus, ★->temps(3★,max3), cap2. Boss+temps = vraies cartes/plateau");
+  console.log("FINAL v3 — marché 5 héros×3, achat->défausse, AVATAR(-1★), ★->temps(3★,max3), cap2.");
   console.log("config                    | J | équilibré | rush | éco/contrôle | tours");
   for(const c of cfgs){for(const np of[1,2,3]){
     const b=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'balanced'},runs);
@@ -145,7 +145,7 @@ if(process.argv[2]==="final"){
   // chaque joueur a un AVATAR. On compare le BONUS : aucun | réduction(-1 coût) | +dégât(+1 icône).
   // On lit aussi la DIVERSITÉ des voies (rush sans achat / éco-contrôle) pour vérifier l'équilibre.
   const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,btCost:3,btMax:3,buyToTop:false,market:HERO_MARKET};
-  const avList=['neo','trinity','morpheus','niobe','tank','zion'];
+  const avList=AV_LIST;
   const cell=(np,b,t,avMode)=>{
     const eq=rate({...base,np,bossHp:b,time:t,strat:'balanced',avMode,avList},runs);
     const ru=rate({...base,np,bossHp:b,time:t,strat:'nobuy',  avMode,avList},runs);

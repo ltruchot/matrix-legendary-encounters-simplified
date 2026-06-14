@@ -43,6 +43,10 @@
   .b-star{right:4px;background:var(--gold)} .b-claw{left:4px;background:#ff7a7a}
   .b-cost{right:4px;top:auto;bottom:4px;background:#fff;width:34px;height:34px;font-size:18px;border:2px solid #042} /* prix bien visible, par-dessus le nom */
   .b-time{left:4px;top:auto;bottom:4px;background:var(--gold);width:auto;height:auto;border-radius:10px;padding:2px 7px;font-size:12px}
+  .hero-line{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .hero-line img{width:36px;height:36px;border-radius:50%;border:2px solid #c08bff;object-fit:cover;object-position:top}
+  .card.hero{box-shadow:0 0 0 2px #c08bff,0 0 14px #c08bff}      /* tes cartes héros = liseré violet */
+  .b-disc{left:4px;top:auto;bottom:4px;background:#c08bff;color:#000;width:auto;height:auto;border-radius:10px;padding:2px 7px;font-size:12px}
   .boss-card{display:flex;gap:10px;align-items:center}
   .boss-card img{width:96px;border:2px solid var(--red);border-radius:8px}
   .actbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -78,6 +82,7 @@
     </select>
   </label>
   <label>Joueurs <select id="np"><option selected>1</option><option>2</option><option>3</option></select></label>
+  <label>Ton héros <select id="hero"></select></label>
   <button class="primary" id="newgame">Nouvelle partie</button>
 </header>
 
@@ -93,6 +98,7 @@
     </div>
     <div class="panel" style="margin-top:10px">
       <div class="stat"><b id="curPlayer">—</b></div>
+      <div class="hero-line"><img id="curAvatar" alt=""><span id="curHero" class="hint"></span></div>
       <div class="pool">
         <div class="chip star"><span class="lbl">★ à dépenser</span><span id="poolStar">0</span></div>
         <div class="chip claw"><span class="lbl">griffure</span><span id="poolClaw">0</span></div>
@@ -114,7 +120,7 @@
     <div class="row-title">🕶️ Boss <small>— clique pour le frapper (griffure). Le mettre à 0 = victoire.</small></div>
     <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(110px,110px))"><div class="card" id="bossAttack" style="border-color:var(--red)"><div style="height:120px;display:flex;align-items:center;justify-content:center;font-size:40px">🎯</div><div class="tag">Frapper le boss</div></div></div>
 
-    <div class="row-title">Marché <small>— clique pour recruter (★). La carte arrive <b>sur ton deck</b> (jouée au tour suivant).</small></div>
+    <div class="row-title">Marché <small>— clique pour recruter (★). La carte va dans ta <b>défausse</b> (rejouée quand ton deck se recycle). <b style="color:#c08bff">Les cartes de ton héros (liseré violet) coûtent −1★.</b></small></div>
     <div class="cards" id="market"></div>
 
     <div class="row-title">Ta main <small>— clique pour jouer (★/griffure s'ajoutent en haut à gauche).</small></div>
@@ -136,8 +142,9 @@
     <span class="icn" style="background:#ff7a7a">╱</span> = <b>griffure</b> = <b>frapper</b> (boss / agents) &nbsp;·&nbsp;
     <span class="icn" style="background:#fff">3</span> = <b>prix</b> (coin bas-droit)
   </p>
+  <p><b>Ton héros :</b> tu incarnes <b style="color:#c08bff">Neo, Trinity, Morpheus…</b> — ses 3 cartes au marché (liseré violet) te coûtent <b>1★ de moins</b>.</p>
   <p><b>Ton tour :</b> un agent débarque (max 2) → joue ta main → dépense :
-  griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte arrive sur ton deck) ou <b>gagner du temps</b>.
+  griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou <b>gagner du temps</b>.
   Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour. Fin du tour :
   chaque agent encore vivant fait <b>⏳−1</b>.</p>
   <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
@@ -148,21 +155,36 @@
 <script>
 const IMG="../assets/cards/";
 const STARTERS=[{name:"Unplug",star:1,claw:0,img:"StarterUnplug.jpg",n:3},{name:"There Is No Spoon",star:0,claw:1,img:"StarterThereIsNoSpoon.jpg",n:2}];
-// Marché CURÉ + icônes vérifiées à la main sur les vraies images (★ doré = recruter, griffure rouge = attaquer).
-// On ne garde que des cartes rentables aux icônes seules (les cartes dont la valeur est dans le texte sont écartées).
+// HÉROS jouables : chaque joueur en incarne un. Ses 3 cartes au marché coûtent 1 ★ de moins (min 1).
+const HEROES=[
+  {id:"neo",     name:"Neo",      av:"AvatarNeoReloaded.jpg"},
+  {id:"trinity", name:"Trinity",  av:"AvatarTrinityMatrix.jpg"},
+  {id:"morpheus",name:"Morpheus", av:"AvatarMorpheusMatrix.jpg"},
+  {id:"niobe",   name:"Niobe",    av:"AvatarNiobe.jpg"},
+  {id:"crew",    name:"Équipage du Nebuchadnezzar", av:"AvatarMouse.jpg"}];
+// Marché : 5 héros × 3 cartes (coût >=2). ICÔNES VÉRIFIÉES À L'ŒIL sur les vraies images
+// (★ doré = recruter, griffure rouge = attaquer) — anti-hallucination, exigence du commanditaire.
 const MARKET_POOL=[
-  {name:"Dozer",star:2,claw:0,cost:2,img:"NebuchadnezzarCrew_2Common.jpg",n:2},
-  {name:"Operator",star:2,claw:0,cost:3,img:"Tank_2Common.jpg",n:2},
-  {name:"I've Spent My Entire Life",star:2,claw:0,cost:3,img:"MorpheusTheMatrix_2Common.jpg",n:2},
-  {name:"Hovercraft Nebuchadnezzar",star:2,claw:0,cost:3,img:"HovercraftTheNebuchadnezzar.jpg",n:2},
-  {name:"Your Men Are Already Dead",star:0,claw:2,cost:4,img:"TrinityTheMatrix_2Common.jpg",n:2},
-  {name:"Combat Training",star:0,claw:2,cost:4,img:"Tank_3Common.jpg",n:2},
-  {name:"You Think That's Air",star:0,claw:3,cost:5,img:"MorpheusTheMatrix_4Uncommon.jpg",n:2},
-  {name:"It's a Trap!",star:0,claw:4,cost:6,img:"Tank_4Uncommon.jpg",n:1},
-  {name:"I Know Kung Fu (Neo)",star:0,claw:1,cost:2,img:"Act1WhatIsTheMatrixExtra_2Common.jpg",n:2},
-  {name:"Guns, Lots of Guns (Neo)",star:0,claw:2,cost:4,img:"Act1WhatIsTheMatrixExtra_3Common.jpg",n:2},
-  {name:"You Move Like They Do (Neo)",star:0,claw:4,cost:5,img:"Act1WhatIsTheMatrixExtra_4Uncommon.jpg",n:2},
-  {name:"I Can See Why She Likes You (Oracle)",star:2,claw:2,cost:1,img:"Act2KnowThyselfExtra_5.jpg",n:1}];
+  // NEO — attaque
+  {h:"neo",name:"I Know Kung Fu (Neo)",star:0,claw:1,cost:2,img:"Act1WhatIsTheMatrixExtra_2Common.jpg",n:1},
+  {h:"neo",name:"Guns, Lots of Guns (Neo)",star:0,claw:2,cost:4,img:"Act1WhatIsTheMatrixExtra_3Common.jpg",n:1},
+  {h:"neo",name:"You Move Like They Do (Neo)",star:0,claw:4,cost:5,img:"Act1WhatIsTheMatrixExtra_4Uncommon.jpg",n:1},
+  // TRINITY — attaque
+  {h:"trinity",name:"She Is Going To Die (Trinity)",star:0,claw:3,cost:3,img:"TrinityRelRev_3Common.jpg",n:1},
+  {h:"trinity",name:"Your Men Are Already Dead (Trinity)",star:0,claw:2,cost:4,img:"TrinityTheMatrix_2Common.jpg",n:1},
+  {h:"trinity",name:"Off The Freeway (Trinity)",star:0,claw:4,cost:6,img:"TrinityRelRev_4Uncommon.jpg",n:1},
+  // MORPHEUS — économie (+1 attaque)
+  {h:"morpheus",name:"I've Spent My Entire Life (Morpheus)",star:2,claw:0,cost:3,img:"MorpheusTheMatrix_2Common.jpg",n:1},
+  {h:"morpheus",name:"Towering Leap (Morpheus)",star:2,claw:0,cost:4,img:"MorpheusRelRev_3Common.jpg",n:1},
+  {h:"morpheus",name:"You Think That's Air (Morpheus)",star:0,claw:3,cost:5,img:"MorpheusTheMatrix_4Uncommon.jpg",n:1},
+  // NIOBE — mixte
+  {h:"niobe",name:"A Hell of a Pilot (Niobe)",star:2,claw:0,cost:2,img:"Niobe_2Common.jpg",n:1},
+  {h:"niobe",name:"Gotcha (Niobe)",star:0,claw:2,cost:4,img:"Niobe_3Common.jpg",n:1},
+  {h:"niobe",name:"Infiltrate (Niobe)",star:0,claw:4,cost:5,img:"Niobe_4Uncommon.jpg",n:1},
+  // ÉQUIPAGE DU NEBUCHADNEZZAR — mixte
+  {h:"crew",name:"Dozer",star:2,claw:0,cost:2,img:"NebuchadnezzarCrew_2Common.jpg",n:1},
+  {h:"crew",name:"Mouse",star:1,claw:1,cost:4,img:"NebuchadnezzarCrew_3Common.jpg",n:1},
+  {h:"crew",name:"Apoc",star:0,claw:4,cost:7,img:"NebuchadnezzarCrew_1Rare.jpg",n:1}];
 const ENEMY_POOL=[
   {name:"Security Guard",hp:1,img:"PartOfTheSystem-SecurityGuard.jpg",n:3},
   {name:"Tactical Police",hp:2,img:"PartOfTheSystem-TacticalPolice.jpg",n:3},
@@ -183,10 +205,12 @@ let G=null, turnSnap=null;
 const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r};
+const ecost=(c,hero)=> c.h===hero ? Math.max(1,c.cost-1) : c.cost; // tes cartes héros : -1★ (min 1)
 
 function newGame(){
   const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.hp;
-  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[],gift:[]});
+  const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
+  const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],played:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
   G={players,cur:0,time:d.time,bossHp,bossMax:bossHp,star:0,claw:0,btUses:0,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:shuffle(expand(ENEMY_POOL)),enemies:[],
      over:false,legueMode:false,legueDone:false};
@@ -219,7 +243,7 @@ function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legu
   render(); }
 function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.claw-=d; G.bossHp-=d; log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
 function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.claw-=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
-function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); if(G.star<c.cost)return flash(`Il faut ${c.cost}★ (tu as ${G.star}).`); G.star-=c.cost; G.boughtThisTurn=true; G.players[G.cur].deck.push({...c}); G.market.splice(i,1); if(G.marketDeck.length)G.market.push(G.marketDeck.pop()); log(`Recruté <b>${c.name}</b> → sur ton deck (joué au prochain tour).`); render(); }
+function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.star-=cost; G.boughtThisTurn=true; p.discard.push({...c}); G.market.splice(i,1); if(G.marketDeck.length)G.market.push(G.marketDeck.pop()); log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
 function buyTime(){ if(G.over)return; if(G.btUses>=BT_MAX)return flash(`Plus de 'gagner du temps' (max ${BT_MAX}).`); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★.`); G.star-=BT_COST; G.time++; G.btUses++; log(`⏳ +1 temps (−${BT_COST}★). Reste ${BT_MAX-G.btUses} usage(s).`); flashTime(); render(); }
 function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
 function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const surv=G.enemies.length;
@@ -233,13 +257,14 @@ function badge(cls,val){return `<div class="badge ${cls}">${val}</div>`}
 function render(){ if(!G)return;
   $("timeVal").textContent=G.time; $("bossHp").textContent=G.bossHp+" / "+G.bossMax;
   $("poolStar").textContent=G.star; $("poolClaw").textContent=G.claw;
+  const p=G.players[G.cur]; const hero=HEROES.find(h=>h.id===p.hero);
   $("curPlayer").textContent="🎮 Joueur "+(G.cur+1);
+  $("curAvatar").src=IMG+hero.av; $("curHero").innerHTML=`incarne <b style="color:#c08bff">${hero.name}</b> — ses cartes au marché : <b>−1★</b>`;
   $("enemies").innerHTML=G.enemies.map(e=>{const ok=G.claw>=e.hp&&!G.over;
     return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">${badge('b-claw',e.hp)}${badge('b-time','⏳-1')}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;}).join("")||'<span class="hint">aucun agent</span>';
-  $("market").innerHTML=G.market.map((c,i)=>{const ok=G.star>=c.cost&&!G.over&&!G.boughtThisTurn;
-    const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<c.cost ? '<div class="need">manque '+(c.cost-G.star)+'★</div>' : '');
-    return `<div class="card market ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',c.cost)}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
-  const p=G.players[G.cur];
+  $("market").innerHTML=G.market.map((c,i)=>{const cost=ecost(c,p.hero), mine=c.h===p.hero, ok=G.star>=cost&&!G.over&&!G.boughtThisTurn;
+    const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<cost ? '<div class="need">manque '+(cost-G.star)+'★</div>' : '');
+    return `<div class="card market ${mine?'hero':''} ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',cost)}${mine?'<div class="b-disc">héros −1</div>':''}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
   $("hand").innerHTML=p.hand.map((c,i)=>`<div class="card ${G.over?'dis':''} ${G.legueMode?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${G.legueMode?'léguer ↑':c.name}</div></div>`).join("")
     + p.played.map((c,i)=>`<div class="card played" onclick="unplay(${i})" title="reprendre">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">↩︎ reprendre</div></div>`).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
@@ -253,6 +278,7 @@ let logbuf=[]; function log(m){logbuf.unshift(m);$("log").innerHTML=logbuf.slice
 function flash(m){log("⚠️ "+m);}
 function flashTime(){const el=$("timeVal");el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}
 
+$("hero").innerHTML=HEROES.map(h=>`<option value="${h.id}">${h.name}</option>`).join("");
 $("newgame").onclick=newGame; $("endTurn").onclick=endTurn; $("bossAttack").onclick=attackBoss;
 $("buyTime").onclick=buyTime; $("legue").onclick=toggleLegue; $("resetTurn").onclick=resetTurn;
 $("help").onclick=()=>$("howtoOv").classList.add("show");
