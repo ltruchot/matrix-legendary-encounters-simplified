@@ -78,7 +78,7 @@
     <select id="diff">
       <option value="facile">🟢 Facile (Agent 10)</option>
       <option value="normal" selected>🟡 Normal (Smith 12)</option>
-      <option value="difficile">🔴 Difficile (Smith 12 · temps 8)</option>
+      <option value="difficile">🔴 Difficile (Smith 15)</option>
     </select>
   </label>
   <label>Joueurs <select id="np"><option selected>1</option><option>2</option><option>3</option></select></label>
@@ -90,7 +90,7 @@
   <div>
     <div class="panel time">
       <div class="stat"><span>⏳ Temps</span><span class="big" id="timeVal">–</span></div>
-      <div class="hint">À 0 = les machines gagnent. Chaque agent encore vivant à la fin de ton tour fait <b>−1</b>.</div>
+      <div class="hint">À 0 = les machines gagnent. Chaque agent encore vivant en fin de ton tour fait <b>−sa griffure</b> (un gros agent vide vite l'horloge !).</div>
     </div>
     <div class="panel boss" style="margin-top:10px">
       <div class="stat"><span>🕶️ Boss</span><span class="big" id="bossHp">–</span></div>
@@ -114,7 +114,7 @@
   </div>
 
   <div class="panel">
-    <div class="row-title">Agents sur la table <small>— clique pour tuer (assez de griffure). Chacun en vie = ⏳−1 en fin de tour.</small></div>
+    <div class="row-title">Agents sur la table <small>— clique pour tuer (coûte sa griffure). Chacun en vie en fin de tour = <b>⏳ −sa griffure</b>. Tue les gros en priorité !</small></div>
     <div class="cards" id="enemies"></div>
 
     <div class="row-title">🕶️ Boss <small>— clique pour le frapper (griffure). Le mettre à 0 = victoire.</small></div>
@@ -143,12 +143,12 @@
     <span class="icn" style="background:#fff">3</span> = <b>prix</b> (coin bas-droit)
   </p>
   <p><b>Ton héros :</b> tu incarnes <b style="color:#c08bff">Neo, Trinity, Morpheus…</b> — ses 3 cartes au marché (liseré violet) te coûtent <b>1★ de moins</b>.</p>
-  <p><b>Ton tour :</b> un agent débarque (max 2) → joue ta main → dépense :
+  <p><b>Ton tour :</b> parfois un agent débarque (max 2) → joue ta main → dépense :
   griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou <b>gagner du temps</b>.
-  Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour. Fin du tour :
-  chaque agent encore vivant fait <b>⏳−1</b>.</p>
+  Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour.</p>
+  <p><b>Attention aux agents :</b> en fin de tour, chaque agent en vie te fait perdre <b>⏳ −sa griffure</b> (un agent à 3 = −3 !). Tu peux le <b>tuer</b> en dépensant sa griffure. Tout l'enjeu : <b>tuer les gros à temps</b> ou <b>foncer</b> sur le boss ?</p>
   <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
-  En difficile, l'économie devient indispensable.</p>
+  En difficile, gérer les agents et l'économie devient indispensable.</p>
   <button class="primary" id="howtoClose">J'ai compris — jouer</button>
 </div></div>
 
@@ -185,19 +185,21 @@ const MARKET_POOL=[
   {h:"crew",name:"Dozer",star:2,claw:0,cost:2,img:"NebuchadnezzarCrew_2Common.jpg",n:1},
   {h:"crew",name:"Mouse",star:1,claw:1,cost:4,img:"NebuchadnezzarCrew_3Common.jpg",n:1},
   {h:"crew",name:"Apoc",star:0,claw:4,cost:7,img:"NebuchadnezzarCrew_1Rare.jpg",n:1}];
-const ENEMY_POOL=[
-  {name:"Security Guard",hp:1,img:"PartOfTheSystem-SecurityGuard.jpg",n:3},
-  {name:"Tactical Police",hp:2,img:"PartOfTheSystem-TacticalPolice.jpg",n:3},
-  {name:"Soldier",hp:3,img:"PartOfTheSystem-Soldier.jpg",n:2},
-  {name:"Police Officer",hp:3,img:"Act1WhatIsTheMatrix_1.jpg",n:2},
-  {name:"Cypher",hp:5,img:"Act3HeIsTheOne_6.jpg",n:1},
-  {name:"Military Guard",hp:6,img:"Act3HeIsTheOne_1.jpg",n:1},
-  {name:"Agent Jones",hp:8,img:"Act3HeIsTheOne_2.jpg",n:1}];
-// Difficulté = vraie carte boss + position du curseur Temps (tout est physique/réel)
+// AGENTS plafonnés à 3 griffures. La griffure d'un agent = ce qu'il faut pour le TUER **et** ce qu'il
+// fait perdre en TEMPS chaque tour s'il survit. (icônes vérifiées à l'œil : 1,2,3,3)
+const AGENTS={
+  1:[{name:"Security Guard",img:"PartOfTheSystem-SecurityGuard.jpg"}],
+  2:[{name:"Tactical Police",img:"PartOfTheSystem-TacticalPolice.jpg"}],
+  3:[{name:"Soldier",img:"PartOfTheSystem-Soldier.jpg"},{name:"Police Officer",img:"Act1WhatIsTheMatrix_1.jpg"}]};
+// Difficulté = carte boss + curseur Temps + composition de la pile de menace (small/mid/big = paires [griffure,nb] ;
+// griffure 0 = carte BLANCHE = aucun agent ; warm = nb de tours de départ garantis sans agent).
 const DIFFS={
-  facile:   {hp:10,time:10,boss:{name:"Agent (10)",       img:"Act3TheSource_1.jpg"}},
-  normal:   {hp:12,time:10,boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"}},
-  difficile:{hp:12,time:8, boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"}}
+  facile:   {bossHp:10,time:10,boss:{name:"Agent (10)",       img:"Act3TheSource_1.jpg"},
+             threat:{small:[[1,4],[2,3],[0,5]], mid:[[2,2],[3,1]], big:[],      warm:2}},
+  normal:   {bossHp:12,time:10,boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"},
+             threat:{small:[[1,3],[2,3],[0,3]], mid:[[3,4],[2,2]], big:[],      warm:1}},
+  difficile:{bossHp:15,time:10,boss:{name:"Agent Smith (15)", img:"Act3HeIsTheOneExtra_9.jpg"},
+             threat:{small:[[1,2],[2,3],[0,2]], mid:[[3,5],[2,2]], big:[[3,1]], warm:1}}
 };
 const HAND=5, CAP=2, BT_COST=3, BT_MAX=3;
 
@@ -206,13 +208,20 @@ const $=id=>document.getElementById(id);
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r};
 const ecost=(c,hero)=> c.h===hero ? Math.max(1,c.cost-1) : c.cost; // tes cartes héros : -1★ (min 1)
+const agentOf=hp=>{const v=AGENTS[hp];const a=v[Math.floor(Math.random()*v.length)];return {...a,hp};};
+// Construit la pile de menace : pop() (depuis la fin) sort d'abord les blancs de warm-up, puis les petits, puis les gros (au fond).
+function buildThreat(t){
+  const ex=spec=>{const r=[];(spec||[]).forEach(([hp,n])=>{for(let i=0;i<n;i++)r.push(hp)});return r;};
+  const order=[...shuffle(ex(t.big)), ...shuffle(ex(t.mid)), ...shuffle(ex(t.small)), ...Array(t.warm||0).fill(0)];
+  return order.map(hp=> hp>0 ? agentOf(hp) : {blank:true});
+}
 
 function newGame(){
-  const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.hp;
+  const np=+$("np").value, d=DIFFS[$("diff").value], bossHp=d.bossHp;
   const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
   const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
   G={players,cur:0,time:d.time,bossHp,bossMax:bossHp,star:0,claw:0,btUses:0,
-     market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:shuffle(expand(ENEMY_POOL)),enemies:[],
+     market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:buildThreat(d.threat),enemies:[],
      over:false,legueMode:false,legueDone:false};
   for(let i=0;i<4;i++) if(G.marketDeck.length)G.market.push(G.marketDeck.pop());
   $("bossImg").src=IMG+d.boss.img; $("bossName").textContent=d.boss.name;
@@ -226,7 +235,9 @@ function startTurn(){
   if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
   p.hand.forEach(c=>c.played=false); // début de tour : tout est "à jouer" (drapeau par carte → position stable)
   G.star=0; G.claw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
-  if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> (${e.hp} PV).`); }
+  if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop();
+    if(e.blank){ log(`Aucun agent ne débarque ce tour-ci.`); }
+    else { e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> — griffure ${e.hp} (à tuer) · <b>⏳ −${e.hp}/tour</b> s'il survit.`); } }
   turnSnap=JSON.stringify(G); // photo du début de tour (pour "Recommencer le tour")
   render();
 }
@@ -249,8 +260,8 @@ function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)r
 function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.star-=cost; G.boughtThisTurn=true; p.discard.push({...c}); if(G.marketDeck.length){G.market[i]=G.marketDeck.pop();}else{G.market.splice(i,1);} log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
 function buyTime(){ if(G.over)return; if(G.btUses>=BT_MAX)return flash(`Plus de 'gagner du temps' (max ${BT_MAX}).`); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★.`); G.star-=BT_COST; G.time++; G.btUses++; log(`⏳ +1 temps (−${BT_COST}★). Reste ${BT_MAX-G.btUses} usage(s).`); flashTime(); render(); }
 function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
-function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const surv=G.enemies.length;
-  if(surv){ G.time-=surv; log(`Fin du tour : ${surv} agent(s) en vie → <b>⏳ −${surv}</b> (reste ${G.time}).`); flashTime(); }
+function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
+  if(drain){ G.time-=drain; log(`Fin du tour : ${G.enemies.length} agent(s) en vie → <b>⏳ −${drain}</b> (reste ${G.time}).`); flashTime(); }
   if(G.time<=0)return end(false);
   p.hand.forEach(c=>delete c.played); p.discard.push(...p.hand); p.hand=[];
   G.cur=(G.cur+1)%G.players.length; startTurn(); }
@@ -264,7 +275,7 @@ function render(){ if(!G)return;
   $("curPlayer").textContent="🎮 Joueur "+(G.cur+1);
   $("curAvatar").src=IMG+hero.av; $("curHero").innerHTML=`incarne <b style="color:#c08bff">${hero.name}</b> — ses cartes au marché : <b>−1★</b>`;
   $("enemies").innerHTML=G.enemies.map(e=>{const ok=G.claw>=e.hp&&!G.over;
-    return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">${badge('b-claw',e.hp)}${badge('b-time','⏳-1')}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;}).join("")||'<span class="hint">aucun agent</span>';
+    return `<div class="card enemy ${ok?'':'dis'}" onclick="killEnemy(${e.uid})">${badge('b-claw',e.hp)}${badge('b-time','⏳-'+e.hp)}<img src="${IMG}${e.img}"><div class="tag">${e.name}</div></div>`;}).join("")||'<span class="hint">aucun agent</span>';
   $("market").innerHTML=G.market.map((c,i)=>{const cost=ecost(c,p.hero), mine=c.h===p.hero, ok=G.star>=cost&&!G.over&&!G.boughtThisTurn;
     const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<cost ? '<div class="need">manque '+(cost-G.star)+'★</div>' : '');
     return `<div class="card market ${mine?'hero':''} ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',cost)}${mine?'<div class="b-disc">héros −1</div>':''}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
@@ -276,7 +287,8 @@ function render(){ if(!G)return;
   $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
   $("resetTurn").disabled=G.over;
   const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à léguer (elle ne sera pas jouée).";}else{b.className="banner";}
-  $("endTurn").textContent=G.enemies.length?`Fin du tour ▶ (⏳ −${G.enemies.length})`:"Fin du tour ▶";
+  const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
+  $("endTurn").textContent=drain?`Fin du tour ▶ (⏳ −${drain})`:"Fin du tour ▶";
 }
 let logbuf=[]; function log(m){logbuf.unshift(m);$("log").innerHTML=logbuf.slice(0,40).map(x=>"• "+x).join("<br>");}
 function flash(m){log("⚠️ "+m);}

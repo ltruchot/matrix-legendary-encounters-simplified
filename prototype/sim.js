@@ -28,6 +28,15 @@ const HERO_MARKET=[
  {h:'crew',    star:2,claw:0,cost:2,n:1}, {h:'crew',    star:1,claw:1,cost:4,n:1}, {h:'crew',    star:0,claw:4,cost:7,n:1}];// Dozer / Mouse / Apoc
 const AV_LIST=['neo','trinity','morpheus','niobe','crew'];
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
+// VARIANTE LIVRÉE (v4) : un agent draine = ses griffures. Pile par difficulté (plafond 3, blancs hp:0, warm-up).
+// Identique à DIFFS.threat de prototype/index.html. buildDeck régénère (shuffle) à chaque partie.
+const THREAT={
+  facile:   {small:[[1,4],[2,3],[0,5]], mid:[[2,2],[3,1]], big:[],      warm:2},
+  normal:   {small:[[1,3],[2,3],[0,3]], mid:[[3,4],[2,2]], big:[],      warm:1},
+  difficile:{small:[[1,2],[2,3],[0,2]], mid:[[3,5],[2,2]], big:[[3,1]], warm:1},
+};
+const tierEx=arr=>{const r=[];(arr||[]).forEach(([hp,n])=>{for(let i=0;i<n;i++)r.push(hp)});return r;};
+const buildDeck=t=>[...shuffle(tierEx(t.big)),...shuffle(tierEx(t.mid)),...shuffle(tierEx(t.small)),...Array(t.warm||0).fill(0)].map(hp=>({hp}));
 
 const rnd=()=>Math.random();
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -108,17 +117,20 @@ function rate(P,runs){let w=0,tw=0;for(let i=0;i<runs;i++){const r=play(P);if(r.
 
 const runs=+(process.env.RUNS||4000);
 if(process.argv[2]==="final"){
-  // RÈGLES v3 (livrées) : main 5, starter 3 Unplug + 2 Spoon, cap 2 agents, Time Track 10,
-  // marché 5 héros×3, achat -> DÉFAUSSE, AVATAR (tes cartes héros -1★), ★->temps (3★=+1, max 3/partie).
-  const base={time:10,hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btCost:3,btMax:3,market:HERO_MARKET,avMode:'discount',avList:AV_LIST};
-  const cfgs=[{label:"🟢 Facile (Agent 10, t10)",bossHp:10,time:10},{label:"🟡 Normal (Smith 12, t10)",bossHp:12,time:10},{label:"🔴 Difficile (Smith 12, t8)",bossHp:12,time:8}];
-  console.log("FINAL v3 — marché 5 héros×3, achat->défausse, AVATAR(-1★), ★->temps(3★,max3), cap2.");
-  console.log("config                    | J | équilibré | rush | éco/contrôle | tours");
-  for(const c of cfgs){for(const np of[1,2,3]){
-    const b=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'balanced'},runs);
-    const a=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'nobuy'},runs);
-    const e=rate({...base,np,bossHp:c.bossHp,time:c.time,strat:'buytime'},runs);
-    console.log(`${c.label.padEnd(20)}| ${np} |   ${b.wr.toFixed(0).padStart(3)}%   | ${a.wr.toFixed(0).padStart(3)}% |    ${e.wr.toFixed(0).padStart(3)}%     | ${b.at.toFixed(1)}`);
+  // RÈGLES v4 (livrées) : main 5, starter 3U+2S, cap2, marché 5 héros×3, achat->défausse, AVATAR(-1★),
+  // ★->temps(3★,max3), AGENTS qui drainent LEUR GRIFFURE (plafond 3, blancs+warm-up). Boss F10/N12/D15.
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btCost:3,btMax:3,market:HERO_MARKET,
+              avMode:'discount',avList:AV_LIST,drainByHp:true};
+  const cfgs=[["🟢 Facile",10,10,'facile'],["🟡 Normal",12,10,'normal'],["🔴 Difficile",15,10,'difficile']];
+  const rateT=(P,key)=>{let w=0,bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,threatDeck:buildDeck(THREAT[key])});
+    if(r.win)w++;else{L++;if(r.boss>0.55*P.bossHp)bl++;}}return{wr:100*w/runs,se:L?Math.round(100*bl/L):0};};
+  console.log(`FINAL v4 — agents drainent leur griffure (plafond 3, blancs+warm-up). Boss F10/N12/D15. runs ${runs}`);
+  console.log("difficulté  | J | 🐒 hasard | 🎯 malin | 🏃 ignore-agents | sans-espoir");
+  for(const [l,b,t,key] of cfgs){for(const np of[1,2,3]){
+    const rn=rateT({...base,np,bossHp:b,time:t,strat:'random',targetPol:'random'},key);
+    const sm=rateT({...base,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},key);
+    const rc=rateT({...base,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'bossonly'},key);
+    console.log(`${l.padEnd(11)}| ${np} |   ${(rn.wr.toFixed(0)+'%').padStart(4)}  |   ${(sm.wr.toFixed(0)+'%').padStart(4)} |       ${(rc.wr.toFixed(0)+'%').padStart(4)}     |     ${sm.se}%`);
   }console.log("");}
 }else if(process.argv[2]==="grid"){
   // Règles fixes : hand5, starter 3 Unplug + 3 Spoon, cap2, grace1. On lit boss x time (np2).
