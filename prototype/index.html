@@ -152,7 +152,7 @@
     <span class="icn" style="background:#fff">3</span> = <b>prix</b> (coin bas-droit)
   </p>
   <p><b>Ton héros :</b> tu incarnes <b style="color:#c08bff">Neo, Trinity, Morpheus…</b> — ses 3 cartes au marché (liseré violet) te coûtent <b>1★ de moins</b>.</p>
-  <p><b>Ton tour :</b> parfois un agent débarque (max 2) → joue ta main → dépense :
+  <p><b>Ton tour :</b> un agent débarque (sauf au tout 1<sup>er</sup> tour ; max 2 sur la table) → joue ta main → dépense :
   griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou <b>gagner du temps</b>.
   Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour.</p>
   <p><b>Attention aux agents :</b> en fin de tour, chaque agent en vie te fait perdre <b>⏳ −sa griffure</b> (un agent à 3 = −3 !). Tu peux le <b>tuer</b> en dépensant sa griffure. Tout l'enjeu : <b>tuer les gros à temps</b> ou <b>foncer</b> sur le boss ?</p>
@@ -200,15 +200,15 @@ const AGENTS={
   1:[{name:"Security Guard",img:"PartOfTheSystem-SecurityGuard.jpg"}],
   2:[{name:"Tactical Police",img:"PartOfTheSystem-TacticalPolice.jpg"}],
   3:[{name:"Soldier",img:"PartOfTheSystem-Soldier.jpg"},{name:"Police Officer",img:"Act1WhatIsTheMatrix_1.jpg"}]};
-// Difficulté = carte boss + curseur Temps + composition de la pile de menace (small/mid/big = paires [griffure,nb] ;
-// griffure 0 = carte BLANCHE = aucun agent ; warm = nb de tours de départ garantis sans agent).
+// Difficulté = carte boss + curseur Temps + pile de menace (small/mid/big = paires [griffure, nb d'agents]).
+// UN AGENT débarque À CHAQUE TOUR ; `warm` = nb de premiers tours sans agent (ouverture jouable, anti-malchance).
 const DIFFS={
   facile:   {bossHp:11,time:10,boss:{name:"Agent (11)",       img:"Act3TheSource_1.jpg"},
-             threat:{small:[[1,3],[2,3],[0,3]], mid:[[2,3],[3,1]], big:[],      warm:1}},
+             threat:{small:[[1,7],[2,3]],                 warm:1}}, // doux : surtout des 1, aucun 3
   normal:   {bossHp:12,time:10,boss:{name:"Agent Smith (12)", img:"Act3HeIsTheOneExtra_9.jpg"},
-             threat:{small:[[1,3],[2,3],[0,3]], mid:[[3,4],[2,2]], big:[],      warm:1}},
+             threat:{small:[[1,6],[2,4]],     big:[[3,1]], warm:1}}, // moyen : 1-2 + un seul 3
   difficile:{bossHp:13,time:10,timePerPlayer:3,boss:{name:"Agent Smith (13)", img:"Act3HeIsTheOneExtra_9.jpg"},
-             threat:{small:[[2,4]], mid:[[3,7],[2,3]], big:[[3,1]], warm:1}} // agent À CHAQUE TOUR (0 blanc), agents 2-3 denses ; +3 temps/joueur (agents non-stop pèsent plus à plusieurs)
+             threat:{small:[[2,4]], mid:[[3,7],[2,3]], big:[[3,1]], warm:1}} // dur : que des 2-3 denses ; +3 temps/joueur (multi)
 };
 const HAND=5, CAP=2, BT_COST=3, BT_MAX=3;
 
@@ -219,11 +219,10 @@ const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()
 const expand=p=>{const r=[];p.forEach(c=>{for(let i=0;i<c.n;i++)r.push({...c})});return r};
 const ecost=(c,hero)=> c.h===hero ? Math.max(1,c.cost-1) : c.cost; // tes cartes héros : -1★ (min 1)
 const agentOf=hp=>{const v=AGENTS[hp];const a=v[Math.floor(Math.random()*v.length)];return {...a,hp};};
-// Construit la pile de menace : pop() (depuis la fin) sort d'abord les blancs de warm-up, puis les petits, puis les gros (au fond).
+// Construit la pile de menace : pop() (depuis la fin) sort d'abord les petits, les gros au fond. Plus de carte blanche.
 function buildThreat(t){
   const ex=spec=>{const r=[];(spec||[]).forEach(([hp,n])=>{for(let i=0;i<n;i++)r.push(hp)});return r;};
-  const order=[...shuffle(ex(t.big)), ...shuffle(ex(t.mid)), ...shuffle(ex(t.small)), ...Array(t.warm||0).fill(0)];
-  return order.map(hp=> hp>0 ? agentOf(hp) : {blank:true});
+  return [...shuffle(ex(t.big)), ...shuffle(ex(t.mid)), ...shuffle(ex(t.small))].map(hp=>agentOf(hp));
 }
 
 function newGame(){
@@ -231,7 +230,7 @@ function newGame(){
   const startTime=d.time+(d.timePerPlayer||0)*(np-1); // +temps/joueur : compense la fuite d'horloge plus rapide à plusieurs
   const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
   const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
-  G={players,cur:0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,btUses:0,
+  G={players,cur:0,turn:0,warm:d.threat.warm||0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,btUses:0,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:buildThreat(d.threat),enemies:[],
      over:false,legueMode:false,legueDone:false};
   for(let i=0;i<4;i++) if(G.marketDeck.length)G.market.push(G.marketDeck.pop());
@@ -246,9 +245,10 @@ function startTurn(){
   if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
   p.hand.forEach(c=>c.played=false); // début de tour : tout est "à jouer" (drapeau par carte → position stable)
   G.spentStar=0; G.spentClaw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
-  if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop();
-    if(e.blank){ log(`Aucun agent ne débarque ce tour-ci.`); }
-    else { e.uid=Math.random(); G.enemies.push(e); log(`Un agent débarque : <b>${e.name}</b> — griffure ${e.hp} (à tuer) · <b>⏳ −${e.hp}/tour</b> s'il survit.`); } }
+  G.turn++;
+  if(G.turn<=G.warm){ log(`Tour ${G.turn} : aucun agent (mise en jambe).`); }
+  else if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e);
+    log(`Un agent débarque : <b>${e.name}</b> — griffure ${e.hp} (à tuer) · <b>⏳ −${e.hp}/tour</b> s'il survit.`); }
   recalc();
   turnSnap=JSON.stringify(G); // photo du début de tour (pour "Recommencer le tour")
   render();

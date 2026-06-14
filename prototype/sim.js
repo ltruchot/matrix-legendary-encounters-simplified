@@ -28,15 +28,15 @@ const HERO_MARKET=[
  {h:'crew',    star:2,claw:0,cost:2,n:1}, {h:'crew',    star:1,claw:1,cost:4,n:1}, {h:'crew',    star:0,claw:4,cost:7,n:1}];// Dozer / Mouse / Apoc
 const AV_LIST=['neo','trinity','morpheus','niobe','crew'];
 const ENEMY_POOL=[{hp:1,n:3},{hp:2,n:3},{hp:3,n:2},{hp:3,n:2},{hp:5,n:1},{hp:6,n:1},{hp:8,n:1}];
-// VARIANTE LIVRÉE (v4) : un agent draine = ses griffures. Pile par difficulté (plafond 3, blancs hp:0, warm-up).
-// Identique à DIFFS.threat de prototype/index.html. buildDeck régénère (shuffle) à chaque partie.
+// v5 : un agent draine = ses griffures. UN AGENT À CHAQUE TOUR (plus de cartes blanches) ; ouverture protégée
+// par `warm` (nb de premiers tours sans agent). Plafond 3 PV. Identique à DIFFS de prototype/index.html.
 const THREAT={
-  facile:   {small:[[1,3],[2,3],[0,3]], mid:[[2,3],[3,1]], big:[],      warm:1},
-  normal:   {small:[[1,3],[2,3],[0,3]], mid:[[3,4],[2,2]], big:[],      warm:1},
-  difficile:{small:[[2,4]], mid:[[3,7],[2,3]], big:[[3,1]], warm:1}, // agent à chaque tour (0 blanc), agents 2-3 denses
+  facile:   {small:[[1,7],[2,3]],                 warm:1}, // doux : surtout des 1, quelques 2, aucun 3
+  normal:   {small:[[1,6],[2,4]],     big:[[3,1]], warm:1}, // moyen : 1-2 + un seul 3
+  difficile:{small:[[2,4]], mid:[[3,7],[2,3]], big:[[3,1]], warm:1}, // dur : que des 2-3, denses
 };
 const tierEx=arr=>{const r=[];(arr||[]).forEach(([hp,n])=>{for(let i=0;i<n;i++)r.push(hp)});return r;};
-const buildDeck=t=>[...shuffle(tierEx(t.big)),...shuffle(tierEx(t.mid)),...shuffle(tierEx(t.small)),...Array(t.warm||0).fill(0)].map(hp=>({hp}));
+const buildDeck=t=>[...shuffle(tierEx(t.big)),...shuffle(tierEx(t.mid)),...shuffle(tierEx(t.small))].map(hp=>({hp}));
 
 const rnd=()=>Math.random();
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -66,7 +66,7 @@ function play(P){
       if(p.hand.length>1){let wi=0;for(let i=1;i<p.hand.length;i++)if((p.hand[i].star+p.hand[i].claw)<(p.hand[wi].star+p.hand[wi].claw))wi=i;
         pending[(cur+1)%P.np]=p.hand.splice(wi,1)[0];}
       if(pending[cur]){p.hand.push(pending[cur]);pending[cur]=null;} }
-    if(threat.length && enemies.length<P.cap){const e=threat.pop();if(e.hp>0)enemies.push(e);} // hp:0 = carte blanche (rien ne débarque)
+    if(turns>(P.warm||0) && threat.length && enemies.length<P.cap){const e=threat.pop();enemies.push(e);} // GRÂCE : pas d'agent pendant les P.warm premiers tours, puis un agent à chaque tour (s'il reste de la place)
     let star=p.hand.reduce((s,c)=>s+c.star,0),claw=p.hand.reduce((s,c)=>s+c.claw,0);
     // AVATAR, mode +dégât : tes cartes héros (icône qui matche ton avatar) valent +1 à l'usage.
     if(P.avMode==='damage'&&p.av)p.hand.forEach(c=>{if(c.h===p.av){if(c.claw>0)claw++;else if(c.star>0)star++;}});
@@ -123,9 +123,9 @@ if(process.argv[2]==="final"){
               avMode:'discount',avList:AV_LIST,drainByHp:true};
   // [label, boss, time base, key, TEMPS +/joueur] — difficile +3/joueur pour aplatir la courbe multi.
   const cfgs=[["🟢 Facile",11,10,'facile',0],["🟡 Normal",12,10,'normal',0],["🔴 Difficile",13,10,'difficile',3]];
-  const rateT=(P,key)=>{let w=0,bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,threatDeck:buildDeck(THREAT[key])});
+  const rateT=(P,key)=>{let w=0,bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,warm:THREAT[key].warm,threatDeck:buildDeck(THREAT[key])});
     if(r.win)w++;else{L++;if(r.boss>0.55*P.bossHp)bl++;}}return{wr:100*w/runs,se:L?Math.round(100*bl/L):0};};
-  console.log(`FINAL v4 — agents drainent leur griffure. Boss F11/N12/D13. Difficile=agents NON-STOP, +3 temps/joueur. runs ${runs}`);
+  console.log(`FINAL v5 — agents drainent leur griffure, UN AGENT/TOUR (0 carte blanche), warm-up. +3 temps/joueur en Difficile. runs ${runs}`);
   console.log("difficulté  | J | 🎯 malin | 🐒 hasard | 🪨 bourrin(0 achat+tape boss) | sans-espoir");
   for(const [l,b,t0,key,tpp] of cfgs){for(const np of[1,2,3]){ const t=t0+tpp*(np-1);
     const sm=rateT({...base,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},key);
@@ -151,32 +151,27 @@ if(process.argv[2]==="final"){
   const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,btCost:3,btMax:3,buyToTop:false,market:HERO_MARKET,
               avMode:'discount',avList:AV_LIST,drainByHp:true,strat:'balanced',valueBuy:true,targetPol:'smart'};
   const tier=arr=>shuffle(expand(arr));
-  // pop() prend la FIN -> on met les blancs de WARM-UP tout au bout (1ers tours garantis sans agent), puis small, puis gros au fond.
-  const deck=(small,mid,big,warm=2)=>[...tier(big),...tier(mid),...tier(small),...Array(warm).fill({hp:0})];
-  const rateD=(P,pool)=>{let w=0;for(let i=0;i<runs;i++){if(play({...P,threatDeck:pool()}).win)w++;}return 100*w/runs;};
-  // "sans espoir" = défaite avec le boss encore > 55% de ses PV (jamais été dans la course), proportionnel au boss.
-  const blow=(P,pool)=>{let bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,threatDeck:pool()});if(!r.win){L++;if(r.boss>0.55*P.bossHp)bl++;}}return L?Math.round(100*bl/L):0;};
-  // 3 cerveaux : MALIN (achète+gère agents) / SINGE (tout au hasard) / BOURRIN (jamais d'achat, tape le boss, ignore agents)
-  const row=(name,pool,b,t)=>{
-    const sm=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},pool));
-    const rn=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'random',targetPol:'random'},pool));
-    const bo=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'nobuy',targetPol:'bossonly'},pool));
-    const se=blow({...base,np:1,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},pool);
-    console.log(`  ${name.padEnd(20)}| ${sm.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | ${rn.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | ${bo.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | ${se}%`);
+  const deck=(small,mid,big)=>[...tier(big||[]),...tier(mid||[]),...tier(small||[])]; // un agent À CHAQUE TOUR (0 carte blanche)
+  const rateD=(P,pool,warm)=>{let w=0;for(let i=0;i<runs;i++){if(play({...P,warm,threatDeck:pool()}).win)w++;}return 100*w/runs;};
+  const blow=(P,pool,warm)=>{let bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,warm,threatDeck:pool()});if(!r.win){L++;if(r.boss>0.55*P.bossHp)bl++;}}return L?Math.round(100*bl/L):0;};
+  const row=(name,pool,b,t,warm)=>{
+    const sm=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},pool,warm));
+    const rn=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'random',targetPol:'random'},pool,warm));
+    const bo=[1,2,3].map(np=>rateD({...base,np,bossHp:b,time:t,strat:'nobuy',targetPol:'bossonly'},pool,warm));
+    const se=blow({...base,np:1,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},pool,warm);
+    console.log(`  ${name.padEnd(24)}| malin ${sm.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | singe ${rn.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | bourrin ${bo.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | se${se}%`);
   };
-  console.log(`AGENTS (plafond 3) — runs ${runs}. MALIN 1/2/3j | SINGE(hasard) | BOURRIN(0 achat+tape boss) | sans-espoir(1j)\n`);
-  console.log("DIFFICILE (boss 13, agents non-stop) — TEMPS DE DÉPART selon le nb de joueurs, pour aplatir la courbe.");
-  console.log("Cible : malin ~60-70% à 1/2/3 joueurs, sans-espoir bas. (horloge par tour de joueur conservée)");
-  const Cpool=()=>deck([{hp:2,n:4}],[{hp:3,n:7},{hp:2,n:3}],[{hp:3,n:1}],1);
-  for(const np of[1,2,3]){
-    let line=`  ${np}j : `;
-    for(const time of (np===1?[10]:np===2?[10,13,15,17]:[10,16,19,22,25])){
-      const sm=rateD({...base,np,bossHp:13,time,strat:'balanced',valueBuy:true,targetPol:'smart'},Cpool);
-      const se=blow({...base,np,bossHp:13,time,strat:'balanced',valueBuy:true,targetPol:'smart'},Cpool);
-      line+=`t${time}=${sm.toFixed(0)}%(se${se}) `;
-    }
-    console.log(line);
-  }
+  console.log(`AGENTS v5 (un agent/tour, 0 blanc) — runs ${runs}. malin | singe(hasard) | bourrin(0 achat+tape boss) | se(1j)\n`);
+  console.log("FACILE — cible : malin ~98, singe ~80, BOURRIN ~50 (engagement requis), se 0");
+  row("Fa b11 w1 1×6 2×3",   ()=>deck([{hp:1,n:6},{hp:2,n:3}]),11,10,1);
+  row("Fb b11 w1 1×7 2×3",   ()=>deck([{hp:1,n:7},{hp:2,n:3}]),11,10,1);
+  row("Fc b10 w1 1×6 2×3",   ()=>deck([{hp:1,n:6},{hp:2,n:3}]),10,10,1);
+  row("Fd b11 w2 1×3 2×6 3×2",()=>deck([{hp:1,n:3},{hp:2,n:6}],[],[{hp:3,n:2}]),11,10,2);
+  row("Fe b12 w2 1×3 2×6 3×2",()=>deck([{hp:1,n:3},{hp:2,n:6}],[],[{hp:3,n:2}]),12,10,2);
+  console.log("\nNORMAL — cible : malin ~90, singe ~60, bourrin ~30, se 0");
+  row("Na b12 w1 1×5 2×4 3×1",()=>deck([{hp:1,n:5},{hp:2,n:4}],[],[{hp:3,n:1}]),12,10,1);
+  row("Nb b12 w1 1×6 2×4 3×1",()=>deck([{hp:1,n:6},{hp:2,n:4}],[],[{hp:3,n:1}]),12,10,1);
+  row("Nc b13 w2 1×3 2×6 3×2",()=>deck([{hp:1,n:3},{hp:2,n:6}],[],[{hp:3,n:2}]),13,10,2);
 }else if(process.argv[2]==="review"){
   // BANC D'ESSAI : l'habileté change-t-elle la donne ? On compare 4 "cerveaux" de joueur,
   // + l'importance du ciblage, + la nature des défaites (de justesse vs sans espoir).
