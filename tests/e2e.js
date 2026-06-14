@@ -7,8 +7,8 @@ const SHOT = __dirname + '/shots/';
 require('fs').mkdirSync(SHOT, { recursive: true });
 
 async function playOneTurn(page){
-  // 1) jouer toute la main
-  for(let i=0;i<12;i++){ const c=page.locator('#hand .card:not(.played)').first();
+  // 1) jouer toute la main (carte non encore jouée = ni "taken" ni "committed")
+  for(let i=0;i<12;i++){ const c=page.locator('#hand .card:not(.taken):not(.committed)').first();
     if(await c.count()===0) break; await c.click({timeout:2000}); }
   // 2) tuer les agents abordables (du moins cher)
   for(let i=0;i<8;i++){ const e=page.locator('#enemies .card.enemy:not(.dis)').first();
