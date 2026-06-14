@@ -34,9 +34,11 @@
   .card.dis{filter:grayscale(.7) brightness(.5);cursor:not-allowed}
   /* carte JOUÉE, 2 états : "prise" (vert, encore annulable) puis "engagée" (orange, ressources dépensées) */
   .card.stamp::after{position:absolute;z-index:2;top:8px;left:50%;transform:translate(-50%,0) rotate(-8deg);font-weight:800;font-size:13px;letter-spacing:.5px;padding:3px 9px;border-radius:6px;box-shadow:0 1px 6px #000;pointer-events:none}
-  .card.taken{opacity:.97;border-color:var(--green);box-shadow:0 0 0 3px var(--green),0 0 14px rgba(25,255,122,.6)}
+  .card.taken{border-color:var(--green);box-shadow:0 0 0 3px var(--green),0 0 14px rgba(25,255,122,.6)}
+  .card.taken img{filter:grayscale(.35) brightness(.72)}     /* illustration légèrement grisée (le bandeau/anneau restent vifs) */
   .card.taken::after{content:"✓ prise";background:rgba(25,255,122,.97);color:#042}
-  .card.committed{opacity:.97;border-color:#ff9f43;box-shadow:0 0 0 3px #ff9f43,0 0 14px rgba(255,159,67,.6)}
+  .card.committed{border-color:#ff9f43;box-shadow:0 0 0 3px #ff9f43,0 0 14px rgba(255,159,67,.6)}
+  .card.committed img{filter:grayscale(.55) brightness(.6)}  /* encore un peu plus grisée = "dépensée" */
   .card.committed::after{content:"🔒 jouée";background:#ff9f43;color:#3a1f00}
   .chip.bump{animation:bump .35s}@keyframes bump{0%{transform:scale(1.35);box-shadow:0 0 14px var(--green)}100%{}}
   .card.buyable{box-shadow:0 0 0 2px var(--gold),0 0 14px var(--gold)}
