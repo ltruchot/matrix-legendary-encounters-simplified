@@ -3,123 +3,157 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MATRIX 5 — Règles (A4)</title>
+<title>MATRIX 5 — Règles</title>
 <style>
-  :root{--g:#0a8f4a;--gold:#b8860b;--red:#c0392b;--ink:#1a2a22;--line:#cdd8d0;--soft:#f3f7f4}
+  :root{--g:#0a8f4a;--silver:#9aa3a8;--gold:#c79a1e;--red:#c0392b;--teal:#1f7a8c;--ink:#1d2a23;--line:#cdd8d0;--soft:#f1f6f2}
   *{box-sizing:border-box}
-  html,body{margin:0;background:#5a6b62;color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif}
-  .page{background:#fff;width:210mm;min-height:297mm;margin:10px auto;padding:7mm 12mm;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-  h1{font-size:21px;margin:0;letter-spacing:2px;color:var(--g)}
-  .tag{font-size:11px;color:#5a7065;margin:1px 0 0}
-  h2{font-size:14px;margin:7px 0 3px;color:#fff;background:var(--g);padding:3px 9px;border-radius:4px;letter-spacing:.5px}
-  h3{font-size:12.5px;margin:7px 0 2px;color:var(--g)}
-  p,li,td,th{font-size:11px;line-height:1.2}
-  ul,ol{margin:3px 0;padding-left:16px}
-  li{margin:1px 0}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
-  .ic{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:50%;text-align:center;font-weight:800;color:#fff;font-size:11px;padding:0 4px}
-  .star{background:var(--gold)} .claw{background:var(--red)} .cost{background:#333} .time{background:#1f7a8c}
-  b.g{color:var(--g)} b.gold{color:var(--gold)} b.red{color:var(--red)}
-  table{border-collapse:collapse;width:100%;margin:5px 0}
-  th,td{border:1px solid var(--line);padding:3px 6px;text-align:left;vertical-align:top}
-  th{background:var(--soft)}
-  .box{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin:4px 0}
-  .goal{border-left:5px solid var(--g)}
-  .small{font-size:11px;color:#5a7065}
-  .step{background:var(--g);color:#fff;border-radius:50%;display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;font-weight:800;font-size:11px;margin-right:4px}
-  .foot{margin-top:8px;border-top:1px solid var(--line);padding-top:5px;font-size:10.5px;color:#5a7065;display:flex;justify-content:space-between}
-  @media print{ body{background:#fff} .page{margin:0;box-shadow:none;width:auto;min-height:auto;padding:7mm 12mm} .noprint{display:none} @page{size:A4;margin:0} }
-  .noprint{position:fixed;top:8px;right:8px;background:var(--g);color:#fff;border:none;padding:8px 12px;border-radius:6px;font:inherit;cursor:pointer}
+  html,body{margin:0;background:#566;color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif}
+  .page{background:#fff;width:210mm;height:297mm;margin:12px auto;padding:15mm 16mm;box-shadow:0 2px 14px rgba(0,0,0,.35);position:relative;overflow:hidden}
+  h1{font-size:30px;margin:0;letter-spacing:2px;color:var(--g)}
+  .tag{font-size:13px;color:#5a7065;margin:3px 0 0}
+  h2{font-size:16px;margin:18px 0 8px;color:#fff;background:var(--g);padding:5px 11px;border-radius:5px;letter-spacing:.5px}
+  h3{font-size:14px;margin:12px 0 4px;color:var(--g)}
+  p,li,td,th{font-size:13px;line-height:1.5}
+  ul,ol{margin:5px 0;padding-left:20px} li{margin:4px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px}
+  b.g{color:var(--g)} b.red{color:var(--red)} .small{font-size:12px;color:#5a7065}
+  /* ICÔNES fidèles aux vraies cartes */
+  .ico{display:inline-block;vertical-align:middle;width:26px;height:26px;border-radius:50%;text-align:center;line-height:26px;font-weight:800;font-size:14px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+  .rec{background:radial-gradient(circle at 35% 30%,#eef1f3,var(--silver));color:#33414a}
+  .cost{background:radial-gradient(circle at 35% 30%,#f4dd92,var(--gold));color:#5a420a}
+  .claw{width:26px;height:26px;vertical-align:middle}
+  .hg{display:inline-block;width:12px;height:15px;vertical-align:-2px;background:center/contain no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'><g fill='none' stroke='%231f7a8c' stroke-width='1.7' stroke-linejoin='round'><path d='M3 1.5h10M3 18.5h10M3.5 2.2l4.5 6.8 4.5-6.8M3.5 17.8l4.5-6.8 4.5 6.8'/></g></svg>")}
+  b.t{color:var(--teal)}
+  .dot{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:middle;margin-right:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+  .dg{background:#1aa554} .dy{background:#e0b400} .dr{background:#c0392b}
+  table{border-collapse:collapse;width:100%;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-size:12px}
+  .box{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:11px 14px;margin:8px 0}
+  .goal{border-left:6px solid var(--g);font-size:14px}
+  .step{background:var(--g);color:#fff;border-radius:50%;display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;font-weight:800;font-size:13px;margin-right:6px}
+  .turn li{margin:9px 0}
+  .foot{position:absolute;left:16mm;right:16mm;bottom:9mm;border-top:1px solid var(--line);padding-top:7px;font-size:11px;color:#5a7065;display:flex;justify-content:space-between}
+  .pg{position:absolute;right:16mm;bottom:9mm;font-size:11px;color:#8a988f}
+  @media print{ html,body{background:#fff} .page{margin:0;box-shadow:none;page-break-after:always} .noprint{display:none} @page{size:A4;margin:0} }
+  .noprint{position:fixed;top:8px;right:8px;background:var(--g);color:#fff;border:none;padding:9px 13px;border-radius:6px;font:inherit;cursor:pointer;z-index:9}
 </style>
 </head>
 <body>
-<button class="noprint" onclick="print()">🖨️ Imprimer / PDF</button>
+<button class="noprint" onclick="print()">Imprimer / PDF</button>
 
+<!-- ============ PAGE 1 ============ -->
 <div class="page">
   <h1>MATRIX&nbsp;5 — DÉCOUVERTE</h1>
-  <div class="tag">Coopératif · 1 à 3 joueurs · une partie ≈ 5 min · <b>on ne lit que les icônes, jamais le texte des cartes</b></div>
+  <div class="tag">Coopératif · 1 à 3 joueurs · une partie ≈ 5 minutes · <b>on ne lit que les icônes, jamais le texte des cartes</b></div>
 
   <div class="box goal">
     <b class="g">BUT —</b> Ensemble, mettez le <b class="red">Boss</b> (Agent Smith) à <b>0 PV</b> <b>avant</b> que le
-    <b style="color:#1f7a8c">⏳ Temps</b> ne tombe à 0. Si le Temps atteint 0, les machines gagnent.
+    <b class="t"><span class="hg"></span> Temps</b> ne tombe à 0. Si le Temps atteint 0, les machines gagnent.
   </div>
 
-  <h2>LES 4 ICÔNES (tout le reste est décoratif)</h2>
-  <div class="cols">
-    <ul>
-      <li><span class="ic star">★</span> <b class="gold">Recruit</b> (en bas à gauche, doré) = sert à <b>acheter</b> au marché et à gagner du temps.</li>
-      <li><span class="ic claw">╱</span> <b class="red">Griffure</b> (rouge) = sert à <b>frapper</b> (le boss ou un agent).</li>
-    </ul>
-    <ul>
-      <li><span class="ic cost">3</span> <b>Coût</b> (en bas à droite d'une carte du marché) = prix d'achat en ★.</li>
-      <li><span class="ic claw">2</span> sur un <b>agent</b> = griffure à dépenser pour le <b>tuer</b>, <b>et</b> ce qu'il fait perdre en ⏳ chaque tour s'il survit.</li>
-    </ul>
-  </div>
+  <h2>LES ICÔNES (tout le reste de la carte est décoratif)</h2>
+  <table>
+    <tr>
+      <td style="width:64px;text-align:center"><span class="ico rec">★</span></td>
+      <td><b>Recruit</b> — icône <b>argentée</b> (chiffre en bas à gauche). C'est ton « argent » : sert à <b>acheter</b> une carte au marché et à <b>gagner du temps</b>.</td>
+    </tr>
+    <tr>
+      <td style="text-align:center"><svg class="claw" viewBox="0 0 26 26"><g stroke="#c0392b" stroke-width="3.4" stroke-linecap="round"><line x1="6" y1="22" x2="12" y2="4"/><line x1="12.5" y1="22" x2="18.5" y2="4"/><line x1="19" y1="22" x2="25" y2="4"/></g></svg></td>
+      <td><b>Griffure</b> — <b>3 traits rouges</b> (chiffre en bas à gauche). C'est ta « force » : sert à <b>frapper</b> le boss ou à <b>tuer un agent</b>.</td>
+    </tr>
+    <tr>
+      <td style="text-align:center"><span class="ico cost">3</span></td>
+      <td><b>Coût</b> — chiffre dans le <b>cercle doré</b> (en bas à droite d'une carte du marché) : son <b>prix d'achat</b> en Recruit.</td>
+    </tr>
+    <tr>
+      <td style="text-align:center"><svg class="claw" viewBox="0 0 26 26"><g stroke="#c0392b" stroke-width="3.4" stroke-linecap="round"><line x1="6" y1="22" x2="12" y2="4"/><line x1="12.5" y1="22" x2="18.5" y2="4"/><line x1="19" y1="22" x2="25" y2="4"/></g></svg></td>
+      <td><b>Griffure sur un AGENT</b> — c'est ce qu'il faut dépenser pour le <b>tuer</b>, <b>ET</b> ce qu'il te fait perdre en <b class="t"><span class="hg"></span> Temps</b> chaque tour s'il survit (un agent à 3 = <b>−3</b>).</td>
+    </tr>
+  </table>
 
   <h2>MISE EN PLACE</h2>
   <div class="cols">
     <div>
       <h3>① Chaque joueur (1 à 3)</h3>
       <ul>
-        <li>Prend un <b>deck de départ</b> : <b>3× Unplug</b> (<span class="ic star">★1</span>) + <b>2× There Is No Spoon</b> (<span class="ic claw">1</span>). Mélangé, face cachée.</li>
-        <li>Choisit un <b class="g">Avatar / héros</b> (distinct des autres) : <b>Neo, Trinity, Morpheus, Niobe</b> ou <b>Équipage du Nebuchadnezzar</b>.</li>
+        <li>Prend un <b>deck de départ</b> : <b>3× Unplug</b> (Recruit 1) + <b>2× There Is No Spoon</b> (Griffure 1). Mélangé, face cachée.</li>
+        <li>Choisit un <b class="g">Avatar</b> (distinct des autres) : <b>Neo, Trinity, Morpheus, Niobe</b> ou <b>Équipage du Nebuchadnezzar</b>.</li>
       </ul>
       <h3>② Marché commun (« le Dock »)</h3>
       <ul>
-        <li>Mélangez les <b>15 cartes</b> du marché (5 héros × 3, voir « cartes à sortir »).</li>
+        <li>Mélangez les <b>15 cartes</b> du marché (5 héros × 3 — voir le guide « cartes à sortir »).</li>
         <li>Révélez-en <b>4</b> face visible.</li>
       </ul>
     </div>
     <div>
       <h3>③ Pile d'agents (face cachée)</h3>
       <ul>
-        <li>Composez la pile selon la difficulté (ci-dessous), avec des <b>cartes blanches</b> (= « aucun agent ce tour »).</li>
-        <li>Posez <b>1 carte blanche sur le dessus</b> (le 1<sup>er</sup> tour démarre sans agent → départ jouable).</li>
+        <li>Composez la pile selon la difficulté (table ci-dessous). <b>Un agent débarquera à chaque tour.</b></li>
+        <li>Mélangez-la, face cachée.</li>
       </ul>
       <h3>④ Boss &amp; Temps</h3>
       <ul>
-        <li>Choisissez le boss et placez un marqueur de <b>PV</b> dessus (voir table).</li>
-        <li>Placez le curseur du <b>⏳ Time Track</b> à sa valeur de départ.</li>
+        <li>Posez le boss et un marqueur de <b>PV</b> dessus.</li>
+        <li>Placez le curseur du <b class="t"><span class="hg"></span> Time Track</b> à sa valeur de départ.</li>
       </ul>
     </div>
   </div>
 
   <table>
-    <tr><th>Difficulté</th><th>Boss (PV)</th><th>⏳ Temps de départ</th><th>Pile d'agents</th></tr>
-    <tr><td>🟢 <b>Facile</b></td><td>Agent — <b>11</b></td><td><b>10</b></td><td>Doux : surtout des 1-2, plein de cartes blanches (≈ 1 tour sur 3 sans agent).</td></tr>
-    <tr><td>🟡 <b>Normal</b></td><td>Smith — <b>12</b></td><td><b>10</b></td><td>Moyen : des 1-2-3, quelques blanches.</td></tr>
-    <tr><td>🔴 <b>Difficile</b></td><td>Smith — <b>13</b></td><td><b>10</b> · <b>+3 par joueur en plus</b> (2j=13, 3j=16)</td><td><b>Agents non-stop</b> : que des 2-3, <b>aucune blanche</b> (un agent débarque chaque tour).</td></tr>
+    <tr><th>Difficulté</th><th>Boss (PV)</th><th><span class="hg"></span> Temps de départ</th><th>Pile d'agents (par griffure)</th></tr>
+    <tr><td><span class="dot dg"></span><b>Facile</b></td><td>Agent — <b>11</b></td><td><b>10</b></td><td>Doux : surtout des <b>1</b>, quelques <b>2</b> (aucun 3).</td></tr>
+    <tr><td><span class="dot dy"></span><b>Normal</b></td><td>Smith — <b>12</b></td><td><b>10</b></td><td>Moyen : des <b>1-2</b> + un seul <b>3</b>.</td></tr>
+    <tr><td><span class="dot dr"></span><b>Difficile</b></td><td>Smith — <b>13</b></td><td><b>10</b> · <b>+3 par joueur en plus</b> (2j = 13, 3j = 16)</td><td>Dur : que des <b>2-3</b>, denses.</td></tr>
   </table>
+  <p class="small">Agents plafonnés à 3 griffures. <b>2 agents maximum</b> sur la table à la fois. <b>Mise en jambe :</b> aucun agent ne débarque au tout premier tour (départ jouable).</p>
 
-  <h2>DÉROULÉ — UN TOUR DE JEU (le joueur actif fait, dans l'ordre)</h2>
-  <p class="small" style="margin:2px 0 4px">La partie enchaîne les tours (joueur 1 → 2 → 3 → 1 → 2…) jusqu'à la victoire ou la défaite.</p>
-  <ol style="list-style:none;padding-left:0">
-    <li><span class="step">1</span><b>Un agent débarque</b> (s'il reste de la place — max 2). Révèle la carte du dessus de la pile d'agents (blanche = personne).</li>
-    <li><span class="step">2</span><b>Joue ta main</b> : pose tes cartes → leurs <span class="ic star">★</span> et <span class="ic claw">griffures</span> s'additionnent dans ton pool.</li>
-    <li><span class="step">3</span><b>Dépense</b> ton pool, dans l'ordre que tu veux :
+  <div class="pg">1 / 2</div>
+</div>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page">
+  <h2 style="margin-top:0">DÉROULÉ D'UN TOUR</h2>
+  <p class="small" style="margin:0 0 6px">La partie enchaîne les tours (joueur 1 → 2 → 3 → 1 → 2…) jusqu'à la victoire ou la défaite. À ton tour, dans l'ordre :</p>
+  <ol class="turn" style="list-style:none;padding-left:0">
+    <li><span class="step">1</span><b>Un agent débarque</b> (sauf au 1<sup>er</sup> tour, et s'il reste de la place — max 2). Pioche la carte du dessus de la pile d'agents et pose-la sur la table.</li>
+    <li><span class="step">2</span><b>Joue ta main</b> : pose tes cartes. Leurs <span class="ico rec" style="width:21px;height:21px;line-height:21px;font-size:12px">★</span> et leurs <svg class="claw" style="width:20px;height:20px" viewBox="0 0 26 26"><g stroke="#c0392b" stroke-width="3.4" stroke-linecap="round"><line x1="6" y1="22" x2="12" y2="4"/><line x1="12.5" y1="22" x2="18.5" y2="4"/><line x1="19" y1="22" x2="25" y2="4"/></g></svg> griffures s'additionnent dans ton pool.</li>
+    <li><span class="step">3</span><b>Dépense ton pool</b>, dans l'ordre que tu veux :
       <ul>
-        <li><span class="ic claw">griffure</span> → <b>frapper</b> : tuer un agent (dépense sa griffure) ou taper le boss.</li>
-        <li><span class="ic star">★</span> → <b>recruter 1 carte</b> au marché (1 achat max/tour) — elle va dans ta <b>défausse</b>. <b class="g">Tes cartes héros coûtent −1★.</b></li>
-        <li><span class="ic star">★</span> → ou <b>Gagner du temps</b> : <b>3★ = +1 ⏳</b> (max 3 fois / partie).</li>
+        <li><b>Griffure → frapper</b> : tuer un agent (dépense sa griffure) ou taper le boss.</li>
+        <li><b>Recruit → recruter 1 carte</b> au marché (<b>1 achat max par tour</b>). Elle va dans ta <b>défausse</b>. <b class="g">Tes cartes héros (ton avatar) coûtent 1 de moins.</b></li>
+        <li><b>Recruit → ou Gagner du temps</b> : <b>3 Recruit = +1</b> <b class="t"><span class="hg"></span> Temps</b> (maximum 3 fois par partie).</li>
       </ul>
     </li>
-    <li><span class="step">4</span><b>Léguer (optionnel)</b> : donne 1 carte de ta main au joueur suivant — il l'aura <b>en main, jouable</b>, à son tour. <span class="small">(Solo : tu la gardes pour ton prochain tour.)</span></li>
-    <li><span class="step">5</span><b>Fin du tour</b> : chaque agent encore <b>en vie</b> te fait perdre <b style="color:#1f7a8c">⏳ = sa griffure</b> (un agent à 3 = −3 !). Puis défausse ta main et passe au joueur suivant.</li>
+    <li><span class="step">4</span><b>Léguer (optionnel)</b> : donne 1 carte de ta main au joueur suivant. Il l'aura <b>en main, jouable</b>, à son tour. <span class="small">(En solo : tu la gardes pour ton prochain tour.)</span></li>
+    <li><span class="step">5</span><b>Fin du tour</b> : chaque agent encore <b>en vie</b> te fait perdre <b class="t"><span class="hg"></span> Temps = sa griffure</b> (un agent à 3 = −3). Puis défausse toute ta main et passe au joueur suivant.</li>
   </ol>
 
+  <h2>RÈGLES À RETENIR</h2>
   <div class="cols">
-    <div class="box">
-      <b class="g">Comment gagner ?</b> Deux écoles à combiner : <b>foncer</b> sur le boss, ou <b>investir</b> (acheter de la griffure / gagner du temps). En Difficile, il faut <b>gérer les agents</b> (tuer les gros à temps) ET builder l'économie — bourriner ne suffit pas.
-    </div>
-    <div class="box">
-      <b class="red">Fin de partie.</b> <b>Boss à 0 PV → 🟢 VICTOIRE</b> (vous avez libéré la Matrice). <b>⏳ Temps à 0 → 💀 DÉFAITE</b> (les machines gagnent).
-    </div>
+    <ul>
+      <li><b>1 seul achat de carte par tour</b> (mais le Recruit restant peut servir à gagner du temps).</li>
+      <li>Une carte achetée va dans ta <b>défausse</b> (tu la rejoueras quand ton deck se recycle), pas tout de suite.</li>
+      <li><b>Avatar :</b> tes 3 cartes héros coûtent <b>1 Recruit de moins</b> au marché.</li>
+    </ul>
+    <ul>
+      <li><b>Gagner du temps :</b> 3 Recruit = +1 <b class="t"><span class="hg"></span> Temps</b>, max 3 fois / partie.</li>
+      <li><b>Léguer :</b> 1 carte/tour, le voisin la joue à son tour (6 cartes ce tour-là).</li>
+      <li><b>Tuer un agent</b> coûte exactement sa griffure ; le faire l'empêche de drainer le temps.</li>
+    </ul>
+  </div>
+
+  <h2>FIN DE PARTIE</h2>
+  <div class="cols">
+    <div class="box" style="border-left:6px solid var(--g)"><b class="g">VICTOIRE</b> — le <b>Boss</b> tombe à <b>0 PV</b>. Vous avez libéré la Matrice.</div>
+    <div class="box" style="border-left:6px solid var(--red)"><b class="red">DÉFAITE</b> — le <b class="t"><span class="hg"></span> Temps</b> tombe à <b>0</b>. Les machines gagnent.</div>
   </div>
 
   <div class="foot">
-    <span>🟢 La règle d'or : « <b>Le texte ne compte pas. Seuls les chiffres et les icônes parlent.</b> »</span>
-    <span>Version jouable &amp; guide de tri des cartes : <b>prototype/index.html</b> · <b>cartes-a-sortir.html</b></span>
+    <span>La règle d'or : « <b>Le texte ne compte pas. Seuls les chiffres et les icônes parlent.</b> »</span>
+    <span>Jouable : <b>index.html</b> · Cartes : <b>cartes-a-sortir.html</b></span>
   </div>
+  <div class="pg">2 / 2</div>
 </div>
 </body>
 </html>
