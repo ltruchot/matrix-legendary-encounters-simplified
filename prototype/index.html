@@ -114,7 +114,7 @@
       </div>
       <div class="actbar">
         <button class="alt" id="buyTime">🛡️ Renfort · 5★ → +1 ⏳</button>
-        <button class="alt" id="legue">🎁 Léguer une carte</button>
+        <button class="alt" id="legue">📤 Uploader une carte</button>
         <button class="alt" id="resetTurn">↩︎ Recommencer le tour</button>
       </div>
       <div class="banner" id="banner"></div>
@@ -154,7 +154,7 @@
   <p><b>Ton héros :</b> tu incarnes <b style="color:#c08bff">Neo, Trinity, Morpheus…</b> — ses 3 cartes au marché (liseré violet) te coûtent <b>1★ de moins</b>.</p>
   <p><b>Ton tour :</b> un agent débarque (sauf au tout 1<sup>er</sup> tour ; max 2 sur la table) → joue ta main → dépense :
   griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou appeler un <b>🛡️ Renfort</b> (5★ → +1 temps : l'équipage ralentit les machines).
-  Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour.</p>
+  Puis tu peux <b>uploader 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour.</p>
   <p><b>Attention aux agents :</b> en fin de tour, chaque agent en vie te fait perdre <b>⏳ −sa griffure</b> (un agent à 3 = −3 !). Tu peux le <b>tuer</b> en dépensant sa griffure. Tout l'enjeu : <b>tuer les gros à temps</b> ou <b>foncer</b> sur le boss ?</p>
   <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
   En difficile, gérer les agents et l'économie devient indispensable.</p>
@@ -242,7 +242,7 @@ function newGame(){
 function startTurn(){
   const p=G.players[G.cur];
   while(p.hand.length<HAND){ if(!p.deck.length){ if(!p.discard.length)break; p.deck=shuffle(p.discard); p.discard=[]; } p.hand.push(p.deck.pop()); }
-  if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
+  if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`📥 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (programme uploadé, jouable ce tour).`); p.gift=[]; }
   p.hand.forEach(c=>c.played=false); // début de tour : tout est "à jouer" (drapeau par carte → position stable)
   G.spentStar=0; G.spentClaw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false; G.renfortDone=false;
   G.turn++;
@@ -282,10 +282,10 @@ function unplay(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over||
   log(`↩︎ Carte reprise en main.`); render(); }
 function resetTurn(){ if(!turnSnap||G.over)return; G=JSON.parse(turnSnap); log("↩︎ Tour recommencé."); render(); }
 function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legueDone)return;
-  if(c.played) return flash("Reprends d'abord cette carte (clique dessus) avant de la léguer.");
+  if(c.played) return flash("Reprends d'abord cette carte (clique dessus) avant de l'uploader.");
   p.hand.splice(i,1); const tgt= G.players.length>1 ? (G.cur+1)%G.players.length : G.cur;
   (G.players[tgt].gift=G.players[tgt].gift||[]).push(c); G.legueDone=true; G.legueMode=false;
-  log(G.players.length>1 ? `🎁 Tu lègues <b>${c.name}</b> au joueur ${tgt+1} (il l'aura en main, jouable, à son tour).` : `🎁 Tu gardes <b>${c.name}</b> en main pour ton prochain tour (tu joueras 6 cartes).`);
+  log(G.players.length>1 ? `📤 Tu uploades <b>${c.name}</b> au joueur ${tgt+1} (prêt à l'emploi, en main, à son tour).` : `📤 Tu te réserves <b>${c.name}</b> en main pour ton prochain tour (tu joueras 6 cartes).`);
   render(); }
 function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.spentClaw+=d; G.bossHp-=d; recalc(); log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
 function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.spentClaw+=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); recalc(); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
@@ -319,13 +319,13 @@ function render(){ if(!G)return; recalc(); // le pool affiché est TOUJOURS reca
     // "prise" = jouée mais encore annulable ; "engagée" = ses ressources couvrent une dépense déjà faite (non reprenable, état stable).
     const locked = pl && committed.has(c);
     const st = !pl ? '' : (locked ? 'stamp committed' : 'stamp taken');
-    const tag = G.legueMode ? (pl?(locked?'🔒 engagée':'✓ prise'):'léguer ↑') : (pl?(locked?'🔒 dépensée':'↩︎ reprendre'):c.name);
+    const tag = G.legueMode ? (pl?(locked?'🔒 engagée':'✓ prise'):'uploader ↑') : (pl?(locked?'🔒 dépensée':'↩︎ reprendre'):c.name);
     return `<div class="card ${G.over?'dis':''} ${st} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
   $("buyTime").disabled=G.over||G.renfortDone||G.star<BT_COST; $("buyTime").textContent=G.renfortDone?`🛡️ Renfort utilisé ✓`:`🛡️ Renfort · ${BT_COST}★ → +1 ⏳`;
-  $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
+  $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'📤 Uploadé ✓':(G.legueMode?'📤 Choisis la carte…':'📤 Uploader une carte');
   $("resetTurn").disabled=G.over;
-  const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à léguer (elle ne sera pas jouée).";}else{b.className="banner";}
+  const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à uploader (elle ne sera pas jouée).";}else{b.className="banner";}
   const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
   $("endTurn").textContent=drain?`Fin du tour ▶ (⏳ −${drain})`:"Fin du tour ▶";
 }
