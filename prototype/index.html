@@ -27,6 +27,11 @@
   .chip .lbl{font-size:11px;font-weight:400;opacity:.75;display:block}
   .row-title{margin:14px 0 6px;color:var(--green);font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.9}
   .row-title small{text-transform:none;letter-spacing:0;opacity:.7;font-weight:400}
+  .hand-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+  .hand-head>span{flex:1}
+  #legue{flex:none;white-space:nowrap;text-transform:none;letter-spacing:0;font-weight:700;align-self:flex-start}
+  #legue.on{background:#3a1c00;border-color:#ff9f43;color:#ffd6a8;box-shadow:0 0 0 2px rgba(255,159,67,.5)}
+  #legue:not(:disabled):not(.on){box-shadow:0 0 10px rgba(10,86,127,.55)}
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;min-height:10px}
   .card{border-radius:8px;overflow:hidden;border:2px solid #0c3;position:relative;cursor:pointer;transition:transform .08s;touch-action:manipulation;-webkit-user-select:none;user-select:none}
   .card:hover{transform:translateY(-4px)}
@@ -114,7 +119,6 @@
       </div>
       <div class="actbar">
         <button class="alt" id="buyTime">🛡️ Renfort · 5★ → +1 ⏳</button>
-        <button class="alt" id="legue">📤 Uploader une carte</button>
         <button class="alt" id="resetTurn">↩︎ Recommencer le tour</button>
       </div>
       <div class="banner" id="banner"></div>
@@ -132,7 +136,10 @@
     <div class="row-title">Marché <small>— clique pour recruter (★). La carte va dans ta <b>défausse</b> (rejouée quand ton deck se recycle). <b style="color:#c08bff">Les cartes de ton héros (liseré violet) coûtent −1★.</b></small></div>
     <div class="cards" id="market"></div>
 
-    <div class="row-title">Ta main <small>— clique pour jouer : <b style="color:var(--green)">✓ prise</b> (annulable, re-clic = reprendre) → <b style="color:#ff9f43">🔒 jouée</b> (orange = dépensée pour un achat/une attaque, plus annulable).</small></div>
+    <div class="row-title hand-head">
+      <span>Ta main <small>— clique pour jouer : <b style="color:var(--green)">✓ prise</b> (annulable, re-clic = reprendre) → <b style="color:#ff9f43">🔒 jouée</b> (orange = dépensée pour un achat/une attaque, plus annulable).</small></span>
+      <button class="alt" id="legue">📤 Uploader une carte</button>
+    </div>
     <div class="cards" id="hand"></div>
     <div id="log"></div>
   </div>
@@ -140,6 +147,16 @@
 
 <!-- Fin de partie -->
 <div class="overlay" id="overlay"><h2 id="ovTitle"></h2><div id="ovText" class="hint"></div><button class="primary" style="margin-top:16px" id="ovClose">Rejouer</button></div>
+
+<!-- Confirmation : fin de tour sans upload -->
+<div class="overlay" id="confirmOv"><div class="howto" style="max-width:480px;text-align:center">
+  <h2 style="font-size:24px;color:var(--blue)">📤 Tu n'as pas uploadé</h2>
+  <div class="hint" id="confirmText" style="font-size:15px;line-height:1.6"></div>
+  <div style="display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap">
+    <button class="alt" id="confirmUpload" style="text-transform:none">📤 Uploader une carte</button>
+    <button class="primary" id="confirmEnd">Finir le tour quand même ▶</button>
+  </div>
+</div></div>
 
 <!-- Tutoriel -->
 <div class="overlay show" id="howtoOv"><div class="howto">
@@ -292,7 +309,16 @@ function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)r
 function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à un Renfort)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.spentStar+=cost; G.boughtThisTurn=true; p.discard.push({...c}); if(G.marketDeck.length){G.market[i]=G.marketDeck.pop();}else{G.market.splice(i,1);} recalc(); log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
 function buyTime(){ if(G.over)return; if(G.renfortDone)return flash("1 renfort par tour maximum."); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★ (un renfort coûte cher : investis dans l'économie d'abord).`); G.spentStar+=BT_COST; G.time++; G.renfortDone=true; recalc(); log(`🛡️ <b>Renfort</b> : l'équipage ralentit les machines (<b>+1 ⏳</b>, −${BT_COST}★).`); flashTime(); render(); }
 function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
-function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
+function endTurn(){ if(G.over)return; const p=G.players[G.cur];
+  // Rappel : il reste des cartes en main et tu n'as rien uploadé → demande confirmation (oubli fréquent).
+  if(!G.legueDone && p.hand.some(c=>!c.played)){
+    $("confirmText").innerHTML = G.players.length>1
+      ? "Il te reste des cartes en main et tu n'as <b>rien uploadé</b> au joueur suivant. Une carte uploadée arrive dans sa main, jouable. Finir le tour quand même ?"
+      : "Il te reste des cartes en main et tu n'as <b>rien réservé</b> pour ton prochain tour (upload solo). Finir le tour quand même ?";
+    return $("confirmOv").classList.add("show");
+  }
+  doEndTurn(); }
+function doEndTurn(){ if(G.over)return; const p=G.players[G.cur]; const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
   if(drain){ G.time-=drain; log(`Fin du tour : ${G.enemies.length} agent(s) en vie → <b>⏳ −${drain}</b> (reste ${G.time}).`); flashTime(); }
   if(G.time<=0)return end(false);
   p.hand.forEach(c=>delete c.played); p.discard.push(...p.hand); p.hand=[];
@@ -323,7 +349,7 @@ function render(){ if(!G)return; recalc(); // le pool affiché est TOUJOURS reca
     return `<div class="card ${G.over?'dis':''} ${st} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
   $("buyTime").disabled=G.over||G.renfortDone||G.star<BT_COST; $("buyTime").textContent=G.renfortDone?`🛡️ Renfort utilisé ✓`:`🛡️ Renfort · ${BT_COST}★ → +1 ⏳`;
-  $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'📤 Uploadé ✓':(G.legueMode?'📤 Choisis la carte…':'📤 Uploader une carte');
+  $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'📤 Uploadé ✓':(G.legueMode?'✖ Annuler l\'upload':'📤 Uploader une carte'); $("legue").classList.toggle('on',G.legueMode&&!G.legueDone);
   $("resetTurn").disabled=G.over;
   const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à uploader (elle ne sera pas jouée).";}else{b.className="banner";}
   const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
@@ -339,6 +365,8 @@ $("buyTime").onclick=buyTime; $("legue").onclick=toggleLegue; $("resetTurn").onc
 $("help").onclick=()=>$("howtoOv").classList.add("show");
 $("howtoClose").onclick=()=>{$("howtoOv").classList.remove("show"); if(!G)newGame();};
 $("ovClose").onclick=()=>{$("overlay").classList.remove("show"); newGame();};
+$("confirmEnd").onclick=()=>{$("confirmOv").classList.remove("show"); doEndTurn();};
+$("confirmUpload").onclick=()=>{$("confirmOv").classList.remove("show"); if(!G.legueMode&&!G.legueDone)toggleLegue();};
 </script>
 </body>
 </html>

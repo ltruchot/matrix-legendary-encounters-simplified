@@ -27,8 +27,10 @@ async function playOneTurn(page){
     return best;
   });
   if(buy>=0) await page.locator('#market .card.market').nth(buy).click({timeout:2000});
-  // 5) fin du tour
+  // 5) fin du tour (+ popup éventuelle "tu n'as pas uploadé" → finir quand même)
   await page.locator('#endTurn').click({timeout:2000});
+  const confirm=page.locator('#confirmOv.show');
+  if(await confirm.count()>0){ await page.locator('#confirmEnd').click({timeout:2000}); }
 }
 const isOver = async page => (await page.locator('#overlay.show').count())>0;
 
