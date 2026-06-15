@@ -29,7 +29,7 @@ Extraites par **OCR** (lecture des images) — chaque valeur a été lue sur la 
 ## Le prototype jouable
 
 [`prototype/index.html`](../prototype/index.html) — **ouvre-le dans un navigateur** (double-clic, ou sers le
-dossier). Implémente « MATRIX 5 » coop (1–4 joueurs en hotseat) avec **les vraies images et les vraies stats** :
+dossier). Implémente « Matrixé par Shodo » coop (1–4 joueurs en hotseat) avec **les vraies images et les vraies stats** :
 - Time Track, PV du boss, marché (4 cartes), main, pile de menace.
 - Clique tes cartes pour les jouer (★ / griffure s'additionnent), clique le boss/les agents pour frapper,
   le marché pour acheter, « Fin du tour ».

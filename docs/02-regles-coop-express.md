@@ -1,4 +1,4 @@
-# 02 — Règle cœur : « MATRIX 5 » (Coop Express)
+# 02 — Règle cœur : « Matrixé par Shodo » (Coop Express)
 
 > **But du stand :** 1 à 4 joueurs, **ensemble**, abattre **Agent Smith** avant que le temps ne tombe à 0.
 > Tout se joue aux icônes. Durée cible : **explication ≤ 90 s, partie ≤ 4 min.**
@@ -87,7 +87,7 @@ Le joueur suivant (sens horaire) enchaîne.
 ## La fiche d'aide du stand (à plastifier)
 
 ```
-        ███ MATRIX 5 ███
+        ███ Matrixé par Shodo ███
   Battez l'agent avant la fin du temps.
 
   À TON TOUR :

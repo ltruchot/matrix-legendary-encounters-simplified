@@ -1,4 +1,4 @@
-// Simulateur + TUNER d'équilibrage pour MATRIX 5 (données réelles, mêmes que index.html).
+// Simulateur + TUNER d'équilibrage pour Matrixé par Shodo (données réelles, mêmes que index.html).
 // Trouve une config (rythme d'arrivée, grâce, main, temps) donnant ~60-70% de victoire.
 // Usage : node prototype/sim.js            -> balaie des configs candidates
 //         node prototype/sim.js final      -> teste la config retenue (table finale)
