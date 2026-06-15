@@ -119,8 +119,8 @@ const runs=+(process.env.RUNS||4000);
 if(process.argv[2]==="final"){
   // RÈGLES v4 (livrées) : main 5, starter 3U+2S, cap2, marché 5 héros×3, achat->défausse, AVATAR(-1★),
   // ★->temps(3★,max3), AGENTS qui drainent LEUR GRIFFURE (plafond 3, blancs+warm-up). Boss F10/N12/D15.
-  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btCost:3,btMax:3,market:HERO_MARKET,
-              avMode:'discount',avList:AV_LIST,drainByHp:true};
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btCost:5,btMax:999,market:HERO_MARKET,
+              avMode:'discount',avList:AV_LIST,drainByHp:true}; // Renfort coûte 5, illimité (1/tour) -> auto-gaté par l'éco
   // [label, boss, time base, key, TEMPS +/joueur] — difficile +3/joueur pour aplatir la courbe multi.
   const cfgs=[["🟢 Facile",11,10,'facile',0],["🟡 Normal",12,10,'normal',0],["🔴 Difficile",13,10,'difficile',3]];
   const rateT=(P,key)=>{let w=0,bl=0,L=0;for(let i=0;i<runs;i++){const r=play({...P,warm:THREAT[key].warm,threatDeck:buildDeck(THREAT[key])});
@@ -172,6 +172,18 @@ if(process.argv[2]==="final"){
   row("Na b12 w1 1×5 2×4 3×1",()=>deck([{hp:1,n:5},{hp:2,n:4}],[],[{hp:3,n:1}]),12,10,1);
   row("Nb b12 w1 1×6 2×4 3×1",()=>deck([{hp:1,n:6},{hp:2,n:4}],[],[{hp:3,n:1}]),12,10,1);
   row("Nc b13 w2 1×3 2×6 3×2",()=>deck([{hp:1,n:3},{hp:2,n:6}],[],[{hp:3,n:2}]),13,10,2);
+}else if(process.argv[2]==="btmax"){
+  // QUESTION : Renfort ILLIMITÉ (1/tour, plus de plafond/partie) mais COÛTE plus cher -> auto-gaté par l'éco.
+  // On compare le coût 3 / 4 / 5. malin = ~insensible ; éco-stall = tempéré par le coût.
+  const base={hand:5,unplug:3,spoon:2,cap:2,grace:0,buyToTop:false,btMax:999,market:HERO_MARKET,avMode:'discount',avList:AV_LIST,drainByHp:true};
+  const cfgs=[["🟢 Facile",11,10,'facile',0],["🟡 Normal",12,10,'normal',0],["🔴 Difficile",13,10,'difficile',3]];
+  const wr=(P,key)=>{let w=0;for(let i=0;i<runs;i++){if(play({...P,warm:THREAT[key].warm,threatDeck:buildDeck(THREAT[key])}).win)w++;}return 100*w/runs;};
+  console.log(`RENFORT illimité (1/tour) — coût 3 / 4 / 5 Recruit. runs ${runs}. vict% malin | vict% éco-stall`);
+  for(const [l,b,t0,key,tpp] of cfgs){for(const np of[1,2,3]){const t=t0+tpp*(np-1);
+    const m=[3,4,5].map(c=>wr({...base,btCost:c,np,bossHp:b,time:t,strat:'balanced',valueBuy:true,targetPol:'smart'},key));
+    const e=[3,4,5].map(c=>wr({...base,btCost:c,np,bossHp:b,time:t,strat:'buytime',targetPol:'smart'},key));
+    console.log(`${l.padEnd(11)}| ${np} | malin ${m.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')} | éco-stall ${e.map(x=>(x.toFixed(0)+'%').padStart(4)).join(' ')}`);
+  }console.log("");}
 }else if(process.argv[2]==="review"){
   // BANC D'ESSAI : l'habileté change-t-elle la donne ? On compare 4 "cerveaux" de joueur,
   // + l'importance du ciblage, + la nature des défaites (de justesse vs sans espoir).

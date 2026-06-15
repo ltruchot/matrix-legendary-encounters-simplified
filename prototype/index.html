@@ -113,7 +113,7 @@
         <div class="chip claw"><span class="lbl">griffure</span><span id="poolClaw">0</span></div>
       </div>
       <div class="actbar">
-        <button class="alt" id="buyTime">⏳ Gagner du temps (3★)</button>
+        <button class="alt" id="buyTime">🛡️ Renfort · 5★ → +1 ⏳</button>
         <button class="alt" id="legue">🎁 Léguer une carte</button>
         <button class="alt" id="resetTurn">↩︎ Recommencer le tour</button>
       </div>
@@ -153,7 +153,7 @@
   </p>
   <p><b>Ton héros :</b> tu incarnes <b style="color:#c08bff">Neo, Trinity, Morpheus…</b> — ses 3 cartes au marché (liseré violet) te coûtent <b>1★ de moins</b>.</p>
   <p><b>Ton tour :</b> un agent débarque (sauf au tout 1<sup>er</sup> tour ; max 2 sur la table) → joue ta main → dépense :
-  griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou <b>gagner du temps</b>.
+  griffure pour <b>frapper</b>, ★ pour <b>recruter</b> (carte va dans ta défausse) ou appeler un <b>🛡️ Renfort</b> (5★ → +1 temps : l'équipage ralentit les machines).
   Puis tu peux <b>léguer 1 carte</b> au joueur suivant : il l'aura <b>en main, jouable</b>, à son tour (il jouera 6 cartes) — solo : tu la gardes pour ton prochain tour.</p>
   <p><b>Attention aux agents :</b> en fin de tour, chaque agent en vie te fait perdre <b>⏳ −sa griffure</b> (un agent à 3 = −3 !). Tu peux le <b>tuer</b> en dépensant sa griffure. Tout l'enjeu : <b>tuer les gros à temps</b> ou <b>foncer</b> sur le boss ?</p>
   <p class="hint">Deux écoles : <b>foncer</b> sur le boss, ou <b>investir</b> (★) pour frapper plus fort / tenir plus longtemps.
@@ -210,7 +210,7 @@ const DIFFS={
   difficile:{bossHp:13,time:10,timePerPlayer:3,boss:{name:"Agent Smith (13)", img:"Act3HeIsTheOneExtra_9.jpg"},
              threat:{small:[[2,4]], mid:[[3,7],[2,3]], big:[[3,1]], warm:1}} // dur : que des 2-3 denses ; +3 temps/joueur (multi)
 };
-const HAND=5, CAP=2, BT_COST=3, BT_MAX=3;
+const HAND=5, CAP=2, BT_COST=5; // Renfort : 5 Recruit -> +1 Temps, max 1 par tour (illimité ; coût élevé = il faut avoir investi)
 
 let G=null, turnSnap=null, _lastStar=null, _lastClaw=null;
 const $=id=>document.getElementById(id);
@@ -230,7 +230,7 @@ function newGame(){
   const startTime=d.time+(d.timePerPlayer||0)*(np-1); // +temps/joueur : compense la fuite d'horloge plus rapide à plusieurs
   const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
   const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
-  G={players,cur:0,turn:0,warm:d.threat.warm||0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,btUses:0,
+  G={players,cur:0,turn:0,warm:d.threat.warm||0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,renfortDone:false,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:buildThreat(d.threat),enemies:[],
      over:false,legueMode:false,legueDone:false};
   for(let i=0;i<4;i++) if(G.marketDeck.length)G.market.push(G.marketDeck.pop());
@@ -244,7 +244,7 @@ function startTurn(){
   while(p.hand.length<HAND){ if(!p.deck.length){ if(!p.discard.length)break; p.deck=shuffle(p.discard); p.discard=[]; } p.hand.push(p.deck.pop()); }
   if(p.gift&&p.gift.length){ p.hand.push(...p.gift); log(`🎁 Tu reçois ${p.gift.map(c=>'<b>'+c.name+'</b>').join(', ')} en main (carte léguée, jouable ce tour).`); p.gift=[]; }
   p.hand.forEach(c=>c.played=false); // début de tour : tout est "à jouer" (drapeau par carte → position stable)
-  G.spentStar=0; G.spentClaw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false;
+  G.spentStar=0; G.spentClaw=0; G.legueMode=false; G.legueDone=false; G.boughtThisTurn=false; G.renfortDone=false;
   G.turn++;
   if(G.turn<=G.warm){ log(`Tour ${G.turn} : aucun agent (mise en jambe).`); }
   else if(G.threat.length && G.enemies.length<CAP){ const e=G.threat.pop(); e.uid=Math.random(); G.enemies.push(e);
@@ -275,8 +275,8 @@ function bequeath(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.legu
   render(); }
 function attackBoss(){ if(G.over)return; if(G.claw<=0)return flash("Pas de griffure."); const d=Math.min(G.claw,G.bossHp); G.spentClaw+=d; G.bossHp-=d; recalc(); log(`Boss −${d} (reste ${G.bossHp}).`); if(G.bossHp<=0)return end(true); render(); }
 function killEnemy(uid){ const e=G.enemies.find(x=>x.uid===uid); if(!e||G.over)return; if(G.claw<e.hp)return flash(`Il faut ${e.hp} griffure (tu as ${G.claw}).`); G.spentClaw+=e.hp; G.enemies=G.enemies.filter(x=>x.uid!==uid); recalc(); log(`<b>${e.name}</b> éliminé (−${e.hp} griffure).`); render(); }
-function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à gagner du temps)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.spentStar+=cost; G.boughtThisTurn=true; p.discard.push({...c}); if(G.marketDeck.length){G.market[i]=G.marketDeck.pop();}else{G.market.splice(i,1);} recalc(); log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
-function buyTime(){ if(G.over)return; if(G.btUses>=BT_MAX)return flash(`Plus de 'gagner du temps' (max ${BT_MAX}).`); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★.`); G.spentStar+=BT_COST; G.time++; G.btUses++; recalc(); log(`⏳ +1 temps (−${BT_COST}★). Reste ${BT_MAX-G.btUses} usage(s).`); flashTime(); render(); }
+function buy(i){ const c=G.market[i]; if(!c||G.over)return; if(G.boughtThisTurn)return flash("1 achat de carte max par tour (ton ★ restant peut servir à un Renfort)."); const p=G.players[G.cur]; const cost=ecost(c,p.hero); if(G.star<cost)return flash(`Il faut ${cost}★ (tu as ${G.star}).`); G.spentStar+=cost; G.boughtThisTurn=true; p.discard.push({...c}); if(G.marketDeck.length){G.market[i]=G.marketDeck.pop();}else{G.market.splice(i,1);} recalc(); log(`Recruté <b>${c.name}</b>${cost<c.cost?' <span style="color:#c08bff">(héros −1)</span>':''} → dans ta défausse.`); render(); }
+function buyTime(){ if(G.over)return; if(G.renfortDone)return flash("1 renfort par tour maximum."); if(G.star<BT_COST)return flash(`Il faut ${BT_COST}★ (un renfort coûte cher : investis dans l'économie d'abord).`); G.spentStar+=BT_COST; G.time++; G.renfortDone=true; recalc(); log(`🛡️ <b>Renfort</b> : l'équipage ralentit les machines (<b>+1 ⏳</b>, −${BT_COST}★).`); flashTime(); render(); }
 function toggleLegue(){ if(G.over||G.legueDone)return; G.legueMode=!G.legueMode; render(); }
 function endTurn(){ if(G.over)return; const p=G.players[G.cur]; const drain=G.enemies.reduce((s,e)=>s+e.hp,0);
   if(drain){ G.time-=drain; log(`Fin du tour : ${G.enemies.length} agent(s) en vie → <b>⏳ −${drain}</b> (reste ${G.time}).`); flashTime(); }
@@ -307,7 +307,7 @@ function render(){ if(!G)return; recalc(); // le pool affiché est TOUJOURS reca
     const tag = G.legueMode ? (pl?(locked?'🔒 engagée':'✓ prise'):'léguer ↑') : (pl?(locked?'🔒 dépensée':'↩︎ reprendre'):c.name);
     return `<div class="card ${G.over?'dis':''} ${st} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
   $("bossAttack").className="card "+(G.claw>0&&!G.over?'':'dis');
-  $("buyTime").disabled=G.over||G.btUses>=BT_MAX||G.star<BT_COST; $("buyTime").textContent=`⏳ Gagner du temps (3★) · ${BT_MAX-G.btUses} restant`;
+  $("buyTime").disabled=G.over||G.renfortDone||G.star<BT_COST; $("buyTime").textContent=G.renfortDone?`🛡️ Renfort utilisé ✓`:`🛡️ Renfort · ${BT_COST}★ → +1 ⏳`;
   $("legue").disabled=G.over||G.legueDone; $("legue").textContent=G.legueDone?'🎁 Légué ✓':(G.legueMode?'🎁 Choisis la carte…':'🎁 Léguer une carte');
   $("resetTurn").disabled=G.over;
   const b=$("banner"); if(G.legueMode){b.className="banner show";b.textContent="Clique une carte de ta main à léguer (elle ne sera pas jouée).";}else{b.className="banner";}
