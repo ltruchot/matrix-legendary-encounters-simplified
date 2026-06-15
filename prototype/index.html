@@ -230,7 +230,7 @@ function newGame(){
   const startTime=d.time+(d.timePerPlayer||0)*(np-1); // +temps/joueur : compense la fuite d'horloge plus rapide à plusieurs
   const lead=Math.max(0,HEROES.findIndex(h=>h.id===$("hero").value)); // héros du joueur 1 ; les autres prennent les suivants (distincts)
   const players=[];for(let i=0;i<np;i++)players.push({deck:shuffle(expand(STARTERS)),discard:[],hand:[],gift:[],hero:HEROES[(lead+i)%HEROES.length].id});
-  G={players,cur:0,turn:0,warm:d.threat.warm||0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,renfortDone:false,
+  G={players,cur:0,turn:0,warm:d.threat.warm||0,time:startTime,bossHp,bossMax:bossHp,star:0,claw:0,spentStar:0,spentClaw:0,playSeq:0,renfortDone:false,
      market:[],marketDeck:shuffle(expand(MARKET_POOL)),threat:buildThreat(d.threat),enemies:[],
      over:false,legueMode:false,legueDone:false};
   for(let i=0;i<4;i++) if(G.marketDeck.length)G.market.push(G.marketDeck.pop());
@@ -258,11 +258,21 @@ function startTurn(){
 function recalc(){ const p=G.players[G.cur];
   const ps=p.hand.reduce((s,c)=>s+(c.played?c.star:0),0), pc=p.hand.reduce((s,c)=>s+(c.played?c.claw:0),0);
   G.star=ps-G.spentStar; G.claw=pc-G.spentClaw; }
+// "engagées" = les cartes (dans l'ordre où elles ont été jouées) dont les ressources couvrent ce qui a déjà été dépensé.
+// État stable : jouer une carte de plus n'en libère aucune. Ces cartes sont non-reprenables.
+function committedSet(){ const p=G.players[G.cur]; const set=new Set();
+  for(const [res,spent] of [["star",G.spentStar],["claw",G.spentClaw]]){
+    if(spent<=0) continue;
+    const played=p.hand.filter(c=>c.played&&c[res]>0).sort((a,b)=>(a.seq||0)-(b.seq||0));
+    let cum=0; for(const c of played){ if(cum<spent) set.add(c); cum+=c[res]; }
+  }
+  return set; }
 function playCard(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over)return;
   if(G.legueMode){ return bequeath(i); }
   if(c.played){ return unplay(i); } // re-clic d'une carte déjà jouée = la reprendre (elle ne bouge pas de place)
-  c.played=true; recalc(); render(); }
+  c.played=true; c.seq=++G.playSeq; recalc(); render(); }
 function unplay(i){ const p=G.players[G.cur]; const c=p.hand[i]; if(!c||G.over||!c.played)return;
+  if(committedSet().has(c)) return flash("Carte déjà engagée (achat / frappe / renfort) — annule l'action concernée, ou clique « Recommencer le tour ».");
   c.played=false; recalc();
   if(G.star<0||G.claw<0){ c.played=true; recalc(); return flash("Ressources déjà dépensées (achat/frappe) — annule-les d'abord, ou clique « Recommencer le tour »."); }
   log(`↩︎ Carte reprise en main.`); render(); }
@@ -300,9 +310,10 @@ function render(){ if(!G)return; recalc(); // le pool affiché est TOUJOURS reca
   $("market").innerHTML=G.market.map((c,i)=>{const cost=ecost(c,p.hero), mine=c.h===p.hero, ok=G.star>=cost&&!G.over&&!G.boughtThisTurn;
     const need = G.boughtThisTurn ? '<div class="need">déjà acheté ce tour</div>' : (G.star<cost ? '<div class="need">manque '+(cost-G.star)+'★</div>' : '');
     return `<div class="card market ${mine?'hero':''} ${ok?'buyable':'dis'}" onclick="buy(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}${badge('b-cost',cost)}${mine?'<div class="b-disc">héros −1</div>':''}${need}<img src="${IMG}${c.img}"><div class="tag">${c.name}</div></div>`;}).join("");
+  const committed=committedSet();
   $("hand").innerHTML=p.hand.map((c,i)=>{const pl=c.played;
-    // "prise" = jouée mais encore annulable ; "engagée" = ses ressources sont déjà dépensées (la reprendre passerait sous 0).
-    const locked = pl && (G.star<c.star || G.claw<c.claw);
+    // "prise" = jouée mais encore annulable ; "engagée" = ses ressources couvrent une dépense déjà faite (non reprenable, état stable).
+    const locked = pl && committed.has(c);
     const st = !pl ? '' : (locked ? 'stamp committed' : 'stamp taken');
     const tag = G.legueMode ? (pl?(locked?'🔒 engagée':'✓ prise'):'léguer ↑') : (pl?(locked?'🔒 dépensée':'↩︎ reprendre'):c.name);
     return `<div class="card ${G.over?'dis':''} ${st} ${G.legueMode&&!pl?'legue':''}" onclick="playCard(${i})">${c.star?badge('b-star',c.star):''}${c.claw?badge('b-claw',c.claw):''}<img src="${IMG}${c.img}"><div class="tag">${tag}</div></div>`;}).join("");
